@@ -13,10 +13,10 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "envtool",
+	Use:   "nviro",
 	Short: "Store and retrieve environment files",
 	Long: `Save and store all your .env files in one place.
-envtool will:
+nviro will:
    - Store and encrypt your .env files
    - Allow you to retrieve your encrypted .env files
    - Keep track of changes to your env files`,

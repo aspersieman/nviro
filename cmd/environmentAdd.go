@@ -11,7 +11,7 @@ import (
 
   "github.com/spf13/cobra"
   "github.com/manifoldco/promptui"
-  "envtool/db"
+  "nviro/db"
 )
 
 // environmentAddCmd represents the environmentAdd command

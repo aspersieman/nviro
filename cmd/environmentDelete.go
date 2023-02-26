@@ -10,7 +10,7 @@ import (
 
   "github.com/spf13/cobra"
   "github.com/manifoldco/promptui"
-  "envtool/db"
+  "nviro/db"
 )
 
 // environmentDeleteCmd represents the environmentDelete command

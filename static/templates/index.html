@@ -1,0 +1,75 @@
+{{define "layout"}}
+<!doctype html>
+<html>
+<head>
+	<title>NViro Server</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script type="text/javascript" src="/static/js/script.js"></script>
+</head>
+<body>
+	<section class="ftco-section">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-md-6 text-center mb-4">
+					<h2 class="heading-section">Environments</h2>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h3 class="h5 mb-4 text-center">
+            <input 
+              type="text" 
+              id="txt-environment-search" 
+              onkeyup="filterEnvironments()" 
+              placeholder="Search.." 
+              title="Enter search">
+          </h3>
+					<div class="table-wrap">
+						<table style="min-width: 400px;" class="table myaccordion table-hover" id="tbl-environments">
+						  <thead>
+						    <tr>
+						      <th>Id</th>
+						      <th>Name</th>
+						      <th>Project Id</th>
+						      <th>Project Name</th>
+						      <th>Deleted At</th>
+						      <th>&nbsp;</th>
+						    </tr>
+						  </thead>
+						  <tbody>
+                {{range .}}
+                <tr data-toggle="collapse" data-target="#environment{{.Id}}" aria-expanded="true" aria-controls="environment{{.Id}}">
+                  <th scope="row">{{.Id}}</th>
+                  <td>{{.Name}}</td>
+                  <td>{{.ProjectId}}</td>
+                  <td>{{.ProjectName}}</td>
+                  <td>{{.DeletedAt}}</td>
+						      <td>
+						      	<i class="fa" aria-hidden="true"></i>
+				        	</td>
+						    </tr>
+						    <tr>
+						    	<td colspan="6" id="environment{{.Id}}" class="collapse show acc" data-parent="#tbl-environments">
+                    <code style="white-space: pre;">{{.Content}}</code>
+						    	</td>
+						    </tr>
+                {{end}}
+						  </tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/popper.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
+{{end}}

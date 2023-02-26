@@ -7,10 +7,12 @@ package cmd
 import (
   "fmt"
   "os"
+  "text/tabwriter"
+  "strconv"
 
 	"github.com/spf13/cobra"
   "github.com/manifoldco/promptui"
-  "envtool/db"
+  "nviro/db"
 )
 
 // environmentShowCmd represents the environmentShow command
@@ -27,9 +29,13 @@ func init() {
 	environmentCmd.AddCommand(environmentShowCmd)
 }
 
-func promptGetEnvironmentShowInput(pc promptContent) string {
+func promptGetEnvironmentShowInput(pc promptContent) int {
   validate := func(input string) error {
-    if input == "" {
+    intInput, err := strconv.Atoi(input) 
+    if err != nil {
+      intInput = -1
+    }
+    if intInput < 0 {
       return fmt.Errorf(pc.errorMsg)
     }
     return nil
@@ -51,8 +57,12 @@ func promptGetEnvironmentShowInput(pc promptContent) string {
     fmt.Printf("Prompt failed %v\n", err)
     os.Exit(1)
   }
+  resultInt, err := strconv.Atoi(result) 
+  if err != nil {
+    resultInt = -1
+  }
 
-  return result
+  return resultInt 
 }
 
 func environmentShow() {
@@ -61,6 +71,18 @@ func environmentShow() {
     "Environment id",
   }
 
-  environmentId := promptGetEnvironmentDeleteInput(environmentIdPromptContent)
-  db.EnvironmentShow(environmentId)
+  environmentId := promptGetEnvironmentShowInput(environmentIdPromptContent)
+  environment := db.EnvironmentShow(environmentId)
+  
+  w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+  fmt.Fprintln(w, "ID:\t", environment.Id)
+  fmt.Fprintln(w, "Name:\t", environment.Name)
+  fmt.Fprintln(w, "Project ID:\t", environment.ProjectId)
+  fmt.Fprintln(w, "Project Name:\t", environment.ProjectName)
+  fmt.Fprintln(w, "Deleted at:\t", environment.DeletedAt)
+  fmt.Fprintln(w, "Created at:\t", environment.CreatedAt)
+  fmt.Fprintln(w, "Updated at:\t", environment.UpdatedAt)
+  fmt.Fprintln(w, "Content: \t")
+  fmt.Fprintln(w, environment.Content)
+  w.Flush()
 }

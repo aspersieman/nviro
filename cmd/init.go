@@ -6,14 +6,14 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-  "envtool/db"
+  "nviro/db"
 )
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialise a new envtool database and schema",
-	Long: "Initialise a new envtool database and schema",
+	Short: "Initialise a new nviro database and schema",
+	Long: "Initialise a new nviro database and schema",
 	Run: func(cmd *cobra.Command, args []string) {
 		db.SchemaCreate()
 	},

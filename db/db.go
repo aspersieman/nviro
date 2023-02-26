@@ -1,17 +1,17 @@
 package db
 
 import (
-  "fmt"
-  "database/sql"
-  "log"
-  "os"
-  "io"
-  "text/tabwriter"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+  "database/sql"
+  "fmt"
+  "io"
+  "log"
+  "os"
+  "runtime"
 
   _ "github.com/mattn/go-sqlite3"
 )
@@ -20,12 +20,40 @@ var db *sql.DB
 
 func OpenDatabase() error {
   var err error
-  // TODO: use goos to detect the OS: https://pkg.go.dev/runtime#GOOS
-  //    Use this location to place the sqlite3.db file in the appropriate folder
-  path := "./storage/db.sqlite3"
-  db, err = sql.Open("sqlite3", path)
-  if err != nil {
-    return err
+  fileName := "db.sqlite3"
+  dbPath := "./storage/"
+  homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+  osType := runtime.GOOS
+  switch osType {
+  case "windows":
+    dbPath = homeDirectory + "/.local/share/nviro/"
+  case "darwin":
+    dbPath = homeDirectory + "/.local/share/nviro/"
+  case "linux":
+    dbPath = homeDirectory + "/.local/share/nviro/"
+  default:
+    fmt.Printf("%s.\n", osType)
+  }
+  _ , error := os.Stat(dbPath)
+
+  if os.IsNotExist(error) {
+    fmt.Printf("Creating dir: %s\n", dbPath)
+  }
+  {
+    err := os.MkdirAll(dbPath, 0750)
+    if err != nil && !os.IsExist(err) {
+      log.Fatal(err)
+    }
+  }
+  {
+    filePath := dbPath + fileName
+    db, err = sql.Open("sqlite3", filePath)
+    if err != nil {
+      return err
+    }
   }
   return db.Ping()
 }
@@ -73,6 +101,13 @@ func SchemaCreate() error {
   return nil
 }
 
+type Project struct {
+	Id int `json:"id"`
+	Name string `json:"name"`
+  CreatedAt string `json:"created_at"`
+  UpdatedAt string `json:"updated_at"`
+}
+
 func ProjectInsert(name string) {
   statement, err := db.Prepare(`
     INSERT INTO projects
@@ -91,16 +126,13 @@ func ProjectInsert(name string) {
   }
 }
 
-func ProjectList() {
-  // TODO handle presentation logic outside of this
+func ProjectList() []Project {
   rows, err := db.Query("SELECT * FROM projects ORDER BY name")
   if err != nil {
     log.Fatal(err.Error())
   }
   defer rows.Close()
-  w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-  fmt.Fprintln(w, "ID\t", "NAME")
-  fmt.Fprintln(w, "----\t", "-----")
+  projects := []Project{}
   for rows.Next() {
     var id int
     var name string
@@ -110,9 +142,15 @@ func ProjectList() {
     if err != nil {
       log.Fatal(err.Error())
     }
-    fmt.Fprintln(w, fmt.Sprintf("%d\t%s", id, name))
-    w.Flush()
+    projects = append(projects, Project{
+      id,
+      name,
+      created_at.String,
+      updated_at.String,
+    })
   }
+
+  return projects
 }
 
 func ProjectDelete(id string) {
@@ -146,12 +184,22 @@ func EnvironmentInsert(name string, content string, project_id string) {
   }
 }
 
-func EnvironmentList(withDeleted bool) {
-  // TODO handle presentation logic outside of this
-  whereSQL := ""
+type Environment struct {
+	Id int `json:"id"`
+	Name string `json:"name"`
+  Content string `json:"content"`
+  ProjectId int `json:"project_id"`
+  ProjectName string `json:"project_name"`
+  DeletedAt string `json:"deleted_at"`
+  CreatedAt string `json:"created_at"`
+  UpdatedAt string `json:"updated_at"`
+}
+
+func EnvironmentList(withDeleted bool) []Environment {
+  whereSQL := "WHERE environments.deleted_at IS NULL"
   if withDeleted {
-    whereSQL = "WHERE environments.deleted_at IS NOT NULL"
-  } 
+    whereSQL = ""
+  }
   query := fmt.Sprintf(`
     SELECT
       environments.id,
@@ -173,16 +221,8 @@ func EnvironmentList(withDeleted bool) {
     log.Fatal(err.Error())
   }
   defer rows.Close()
-  w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-  // TODO use a slice to define column headers and dividers
-  columnHeaders := "ID\tNAME\tPROJECT ID\tPROJECT NAME\tDELETED AT\tCREATED AT\tUPDATED AT"
-  columnDivider := "--\t----\t----------\t------------\t\t----------\t----------"
-  if !withDeleted {
-    columnHeaders = "ID\tNAME\tPROJECT ID\tPROJECT NAME\tCREATED AT\tUPDATED AT"
-    columnDivider = "--\t----\t----------\t------------\t----------\t----------"
-  }
-  fmt.Fprintln(w, columnHeaders)
-  fmt.Fprintln(w, columnDivider)
+  environments := []Environment{}
+  key := getKey()
   for rows.Next() {
     var id int
     var name string
@@ -196,15 +236,20 @@ func EnvironmentList(withDeleted bool) {
     if err != nil {
       log.Fatal(err.Error())
     }
-    if (withDeleted) {
-      data := fmt.Sprintf("%d\t%s\t%d\t%s\t%s\t%s\t%s", id, name, project_id, project_name, deleted_at.String, created_at.String, updated_at.String)
-      fmt.Fprintln(w, data)
-    } else {
-      data := fmt.Sprintf("%d\t%s\t%d\t%s\t%s\t%s", id, name, project_id, project_name, created_at.String, updated_at.String)
-      fmt.Fprintln(w, data)
-    }
+    contentDecrypted := decrypt(key, content)
+    environments = append(environments, Environment{
+      id,
+      name,
+      contentDecrypted,
+      project_id,
+      project_name,
+      deleted_at.String,
+      created_at.String,
+      updated_at.String,
+    })
   }
-  w.Flush()
+
+  return environments
 }
 
 func EnvironmentDelete(id string) {
@@ -221,30 +266,50 @@ func EnvironmentDelete(id string) {
 }
 
 
-func EnvironmentShow(id string) {
-  // TODO handle presentation logic outside of this
+func EnvironmentShow(id int) Environment {
   statement, err := db.Prepare(`
     SELECT
-      environments.content
+      environments.name,
+      environments.content,
+      environments.project_id,
+      projects.name AS project_name,
+      environments.deleted_at,
+      environments.created_at,
+      environments.updated_at
     FROM
       environments
-    WHERE id = ?
+      INNER JOIN projects ON projects.id = environments.project_id
+    WHERE environments.id = ?
   `)
   if err != nil {
     log.Fatal(err.Error())
   }
   defer statement.Close()
+  var name string
   var content string
+  var project_id int
+  var project_name string
+  var deleted_at sql.NullString
+  var created_at sql.NullString 
+  var updated_at sql.NullString
   {
-    err = statement.QueryRow(id).Scan(&content)
+    err = statement.QueryRow(id).Scan(&name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at)
     if err != nil {
       log.Fatal(err.Error())
     }
   }
-  fmt.Println("----------")
   key := getKey()
   contentDecrypted := decrypt(key, content)
-  fmt.Println(contentDecrypted)
+  return Environment{
+    id,
+    name,
+    contentDecrypted,
+    project_id,
+    project_name,
+    deleted_at.String,
+    created_at.String,
+    updated_at.String,
+  }
 }
 
 func encrypt(keyString string, stringToEncrypt string) (encryptedString string) {
