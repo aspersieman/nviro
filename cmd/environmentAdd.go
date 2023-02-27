@@ -6,8 +6,9 @@ package cmd
 
 import (
   "fmt"
-  "os"
   "io/ioutil"
+  "os"
+  "strconv"
 
   "github.com/spf13/cobra"
   "github.com/manifoldco/promptui"
@@ -84,6 +85,10 @@ func environmentAdd() {
     }
     fileString := string(fileBytes)
 
-    db.EnvironmentInsert(environmentName, fileString, environmentProjectId)
+    intProjectId, err := strconv.Atoi(environmentProjectId) 
+    if err != nil {
+      intProjectId = -1
+    }
+    db.EnvironmentInsert(environmentName, fileString, intProjectId)
   }
 }

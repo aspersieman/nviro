@@ -11,11 +11,14 @@
   <script type="text/javascript" src="/static/js/script.js"></script>
 </head>
 <body>
-	<section class="ftco-section">
+	<section>
 		<div class="container">
 			<div class="row justify-content-center">
 				<div class="col-md-6 text-center mb-4">
-					<h2 class="heading-section">Environments</h2>
+					<h2 class="heading-section">
+            <img src="/static/img/logo.png" class="logo">
+            Environments
+          </h2>
 				</div>
 			</div>
 			<div class="row">
@@ -29,7 +32,7 @@
               title="Enter search">
           </h3>
 					<div class="table-wrap">
-						<table style="min-width: 400px;" class="table myaccordion table-hover" id="tbl-environments">
+						<table style="min-width: 400px !important;" class="table myaccordion table-hover" id="tbl-environments">
 						  <thead>
 						    <tr>
 						      <th>Id</th>
@@ -42,7 +45,7 @@
 						  </thead>
 						  <tbody>
                 {{range .}}
-                <tr data-toggle="collapse" data-target="#environment{{.Id}}" aria-expanded="true" aria-controls="environment{{.Id}}">
+                <tr data-toggle="collapse" data-target="#environment{{.Id}}" aria-expanded="false" aria-controls="environment{{.Id}}">
                   <th scope="row">{{.Id}}</th>
                   <td>{{.Name}}</td>
                   <td>{{.ProjectId}}</td>
@@ -53,7 +56,7 @@
 				        	</td>
 						    </tr>
 						    <tr>
-						    	<td colspan="6" id="environment{{.Id}}" class="collapse show acc" data-parent="#tbl-environments">
+						    	<td colspan="6" id="environment{{.Id}}" class="collapse acc" data-parent="#tbl-environments">
                     <code style="white-space: pre;">{{.Content}}</code>
 						    	</td>
 						    </tr>

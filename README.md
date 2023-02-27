@@ -4,6 +4,7 @@
  - Create CRUD API endpoints for projects, environments
  - Allow CRUD actions from UI for projects, environments
  - Write tests
- - Create favicon
- - Create landing image
- - Embed static/* into binary
+ - DONE Create favicon
+ - DONE Create landing image
+ - DONE Embed static/* into binary
+ - Convert to Alpine.js

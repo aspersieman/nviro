@@ -8261,3 +8261,10 @@ h1, h2, h3, h4, h5,
   [data-toggle="collapse"].collapsed:hover {
     background: #ececec !important;
     border-bottom: 2px solid #ececec; }
+
+/* Custom */
+.logo {
+  margin: auto;
+  max-width: 128px;
+}
+/* Custom */

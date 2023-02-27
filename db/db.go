@@ -108,7 +108,7 @@ type Project struct {
   UpdatedAt string `json:"updated_at"`
 }
 
-func ProjectInsert(name string) {
+func ProjectInsert(name string) error {
   statement, err := db.Prepare(`
     INSERT INTO projects
       (name, created_at, updated_at)
@@ -117,13 +117,14 @@ func ProjectInsert(name string) {
   `)
   if err != nil {
     log.Fatal(err.Error())
+    return err
   }
-  {
-    _, err := statement.Exec(name)
-    if err != nil {
-      log.Fatalln(err.Error())
-    }
+  _, err = statement.Exec(name)
+  if err != nil {
+    log.Fatalln(err.Error())
+    return err
   }
+  return nil
 }
 
 func ProjectList() []Project {
@@ -153,20 +154,20 @@ func ProjectList() []Project {
   return projects
 }
 
-func ProjectDelete(id string) {
+func ProjectDelete(id string) error {
   statement, err := db.Prepare("DELETE FROM projects WHERE id = ?")
   if err != nil {
     log.Fatal(err.Error())
   }
-  {
-    _, err := statement.Exec(id)
-    if err != nil {
-      log.Fatalln(err.Error())
-    }
+  _, err = statement.Exec(id)
+  if err != nil {
+    log.Fatalln(err.Error())
+    return err
   }
+  return nil
 }
 
-func EnvironmentInsert(name string, content string, project_id string) {
+func EnvironmentInsert(name string, content string, project_id int) error {
   contentEncrypted := encrypt(getKey(), content)
   statement, err := db.Prepare(`
     INSERT INTO environments
@@ -175,13 +176,14 @@ func EnvironmentInsert(name string, content string, project_id string) {
       (?, ?, ?, datetime('now'), datetime('now'), NULL)`)
   if err != nil {
     log.Fatal(err.Error())
+    return err
   }
-  {
-    _, err := statement.Exec(name, contentEncrypted, project_id)
-    if err != nil {
-      log.Fatalln(err.Error())
-    }
+  _, err = statement.Exec(name, contentEncrypted, project_id)
+  if err != nil {
+    log.Fatalln(err.Error())
+    return err
   }
+  return nil
 }
 
 type Environment struct {
@@ -252,17 +254,18 @@ func EnvironmentList(withDeleted bool) []Environment {
   return environments
 }
 
-func EnvironmentDelete(id string) {
+func EnvironmentDelete(id string) error {
   statement, err := db.Prepare("UPDATE environments SET deleted_at = datetime('now') WHERE id = ?")
   if err != nil {
     log.Fatal(err.Error())
+    return err
   }
-  {
-    _, err := statement.Exec(id)
-    if err != nil {
-      log.Fatalln(err.Error())
-    }
+  _, err = statement.Exec(id)
+  if err != nil {
+    log.Fatalln(err.Error())
+    return err
   }
+  return nil
 }
 
 

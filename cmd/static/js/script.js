@@ -1,4 +1,3 @@
-console.log('Hello world')
 const filterEnvironments = () => {
   const trs = document.querySelectorAll('#tbl-environments tbody tr')
   console.log(trs)
