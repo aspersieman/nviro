@@ -23,7 +23,7 @@ var (
   pages = map[string]string{
     "/": "static/templates/index.html",
   }
-  //go:embed static/css/bootstrap/mixins/* static/css/bootstrap/utilities/* static/css/style.css static/js/* static/scss/bootstrap/mixins/* static/scss/bootstrap/utilities/* static/scss/bootstrap/vendor/* static/templates/index.html static/img/* static/favicon.ico 
+  //go:embed static/css/style.css static/js/* static/templates/index.html static/img/* static/favicon.ico 
   res embed.FS
   debug = false
 )
@@ -57,6 +57,11 @@ type ProjectAdd struct {
 	Name string `json:"name"`
 }
 
+type ProjectUpdate struct {
+	Id int `json:"id"`
+	Name string `json:"name"`
+}
+
 func projects(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
 
@@ -76,7 +81,21 @@ func projects(w http.ResponseWriter, r *http.Request) {
       log.Fatal(err)
     }
   case "PUT":
-    // update project
+    fmt.Println("URL: ", r.URL.Path)
+    reqBody, err := ioutil.ReadAll(r.Body)
+    values := r.URL.Query()
+    for k, v := range values {
+      fmt.Println(k, " => ", v)
+    }
+    var project ProjectUpdate
+    json.Unmarshal([]byte(reqBody), &project)
+    if err != nil {
+      log.Fatal(err)
+    }
+    err = db.ProjectUpdate(project.Id, project.Name)
+    if err != nil {
+      log.Fatal(err)
+    }
   default:
     w.WriteHeader(http.StatusNotImplemented)
     w.Write([]byte(http.StatusText(http.StatusNotImplemented)))
@@ -157,6 +176,7 @@ func serve() {
     }
   })
 	http.HandleFunc("/api/projects", projects)
+	http.HandleFunc("/api/projects/", projects)
 	http.HandleFunc("/api/environments", environments)
   p := "6969"
   log.Printf("Server started at :%s\n", p)

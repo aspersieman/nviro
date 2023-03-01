@@ -127,6 +127,26 @@ func ProjectInsert(name string) error {
   return nil
 }
 
+func ProjectUpdate(id int, name string) error {
+  statement, err := db.Prepare(`
+    UPDATE projects
+    SET
+      name = ?,
+      updated_at = datetime('now')
+    WHERE id = ?
+  `)
+  if err != nil {
+    log.Fatal(err.Error())
+    return err
+  }
+  _, err = statement.Exec(name, id)
+  if err != nil {
+    log.Fatalln(err.Error())
+    return err
+  }
+  return nil
+}
+
 func ProjectList() []Project {
   rows, err := db.Query("SELECT * FROM projects ORDER BY name")
   if err != nil {
