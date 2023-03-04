@@ -7,6 +7,7 @@ package cmd
 import (
   "fmt"
   "os"
+  "strconv"
 
   "github.com/spf13/cobra"
   "github.com/manifoldco/promptui"
@@ -60,8 +61,7 @@ func environmentDelete() {
     "Environment id is required",
     "Environment id",
   }
-
-  environmentId := promptGetEnvironmentDeleteInput(environmentIdPromptContent)
+  environmentId, _ := strconv.Atoi(promptGetEnvironmentDeleteInput(environmentIdPromptContent))
   db.EnvironmentDelete(environmentId)
   fmt.Printf("Environment %s deleted\n", environmentId)
 }

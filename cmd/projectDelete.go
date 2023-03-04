@@ -7,6 +7,7 @@ package cmd
 import (
   "fmt"
   "os"
+  "strconv"
 
   "github.com/spf13/cobra"
   "github.com/manifoldco/promptui"
@@ -61,7 +62,7 @@ func projectDelete() {
     "Project id",
   }
 
-  projectId := promptGetProjectDeleteInput(projectIdPromptContent)
+  projectId, _ := strconv.Atoi(promptGetProjectDeleteInput(projectIdPromptContent))
   db.ProjectDelete(projectId)
   fmt.Printf("Project %s deleted\n", projectId)
 }

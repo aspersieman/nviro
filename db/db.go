@@ -148,7 +148,7 @@ func ProjectUpdate(id int, name string) error {
 }
 
 func ProjectList() []Project {
-  rows, err := db.Query("SELECT * FROM projects ORDER BY name")
+  rows, err := db.Query("SELECT * FROM projects ORDER BY name ASC")
   if err != nil {
     log.Fatal(err.Error())
   }
@@ -174,7 +174,7 @@ func ProjectList() []Project {
   return projects
 }
 
-func ProjectDelete(id string) error {
+func ProjectDelete(id int) error {
   statement, err := db.Prepare("DELETE FROM projects WHERE id = ?")
   if err != nil {
     log.Fatal(err.Error())
@@ -274,7 +274,7 @@ func EnvironmentList(withDeleted bool) []Environment {
   return environments
 }
 
-func EnvironmentDelete(id string) error {
+func EnvironmentDelete(id int) error {
   statement, err := db.Prepare("UPDATE environments SET deleted_at = datetime('now') WHERE id = ?")
   if err != nil {
     log.Fatal(err.Error())
@@ -333,6 +333,29 @@ func EnvironmentShow(id int) Environment {
     created_at.String,
     updated_at.String,
   }
+}
+
+func EnvironmentUpdate(id int, name string, content string, project_id int) error {
+  statement, err := db.Prepare(`
+    UPDATE environments
+    SET
+      name = ?,
+      content = ?,
+      project_id = ?,
+      updated_at = datetime('now')
+    WHERE id = ?
+  `)
+  if err != nil {
+    log.Fatal(err.Error())
+    return err
+  }
+  contentEncrypted := encrypt(getKey(), content)
+  _, err = statement.Exec(name, contentEncrypted, project_id, id)
+  if err != nil {
+    log.Fatalln(err.Error())
+    return err
+  }
+  return nil
 }
 
 func encrypt(keyString string, stringToEncrypt string) (encryptedString string) {
