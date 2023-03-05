@@ -14,7 +14,9 @@ import (
   "io/ioutil"
   "log"
   "net/http"
+  "reflect"
   "regexp"
+  "runtime"
   "strconv"
   "strings"
 
@@ -67,13 +69,23 @@ type EnvironmentUpdate struct {
   ProjectId int `json:"project_id"`
 }
 
+type route struct {
+	method  string
+	regex   *regexp.Regexp
+	handler http.HandlerFunc
+}
+
 func getField(r *http.Request, index int) string {
 	fields := r.Context().Value(ctxKey{}).([]string)
 	return fields[index]
 }
 
 func newRoute(method, pattern string, handler http.HandlerFunc) route {
-	return route{method, regexp.MustCompile("^" + pattern + "$"), handler}
+	return route{
+    method,
+    regexp.MustCompile("^" + pattern + "$"),
+    loggingMiddleware(http.HandlerFunc(handler), method),
+  }
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -106,14 +118,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiGetProjects(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiGetProjects\n")
   w.Header().Set("Content-Type", "application/json")
   environments := db.ProjectList()
   json.NewEncoder(w).Encode(environments)
 }
 
 func apiCreateProject(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiCreateProject\n")
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
   var project ProjectUpdate
@@ -128,7 +138,6 @@ func apiCreateProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiUpdateProject(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiUpdateProject\n")
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
   var project ProjectUpdate
@@ -144,7 +153,6 @@ func apiUpdateProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiDeleteProject(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiDeleteProject\n")
   w.Header().Set("Content-Type", "application/json")
   id, _ := strconv.Atoi(getField(r, 0))
   err := db.ProjectDelete(id)
@@ -154,14 +162,12 @@ func apiDeleteProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiGetEnvironments(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiGetEnvironments\n")
   w.Header().Set("Content-Type", "application/json")
   environments := db.EnvironmentList(true)
   json.NewEncoder(w).Encode(environments)
 }
 
 func apiCreateEnvironment(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiCreateEnvironment\n")
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
   var environment EnvironmentUpdate
@@ -176,7 +182,6 @@ func apiCreateEnvironment(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiUpdateEnvironment(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiUpdateEnvironment\n")
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
   var environment EnvironmentUpdate
@@ -192,7 +197,6 @@ func apiUpdateEnvironment(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
-  fmt.Printf("Handle function: apiDeleteEnvironment\n")
   w.Header().Set("Content-Type", "application/json")
   id, _ := strconv.Atoi(getField(r, 0))
   err := db.EnvironmentDelete(id)
@@ -201,15 +205,20 @@ func apiDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
   }
 }
 
-type route struct {
-	method  string
-	regex   *regexp.Regexp
-	handler http.HandlerFunc
+func getFunctionName(temp interface{}) string {
+  strs := strings.Split((runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name()), ".")
+  return strs[len(strs)-1]
+}
+
+func loggingMiddleware(next http.HandlerFunc, method string) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    log.Printf("INFO: Request: [%s] %s => %s", method, r.URL.Path, getFunctionName(next))
+		next.ServeHTTP(w, r)
+	})
 }
 
 func Serve(w http.ResponseWriter, r *http.Request) {
 	var allow []string
-  fmt.Printf("Request [%s] %s\n", r.Method, r.URL.Path)
 	for _, route := range routes {
 		matches := route.regex.FindStringSubmatch(r.URL.Path)
 		if len(matches) > 0 {
@@ -242,7 +251,7 @@ func start() {
   http.Handle("/static/", http.FileServer(http.FS(res)))
   http.Handle("/favicon.ico", http.FileServer(http.FS(res)))
   p := "6969"
-  log.Printf("Server started at :%s\n", p)
+  log.Printf("INFO: Server started at :%s\n", p)
   err := http.ListenAndServe(":" + p, http.HandlerFunc(Serve))
   if err != nil {
     panic(err)
