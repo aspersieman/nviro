@@ -1,13 +1,3 @@
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        clifford: '#da373d',
-      }
-    }
-  }
-}
-
 const filterEnvironments = () => {
   const trs = document.querySelectorAll('#tbl-environments tbody tr')
   console.log(trs)

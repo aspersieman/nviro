@@ -5,32 +5,25 @@
 	<title>NViro Server</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <!--
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-  -->
-  <link rel="stylesheet" href="/static/css/style.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/output.css">
+  <script defer type="text/javascript" src="/static/js/alpine.min.js"></script>
   <script defer type="text/javascript" src="/static/js/script.js"></script>
+  <link rel="shortcut icon" type="image/jpg" href="/static/favicon.ico"/>
 </head>
 <body>
-  <h1 class="text-3xl font-bold underline text-clifford">
-    Hello world!
-  </h1>
 	<section>
-		<div class="container">
-			<div class="row justify-content-center">
-				<div class="col-md-6 text-center mb-4">
-					<h2 class="heading-section">
+		<div class="w-100 px-6 mx-auto">
+			<div class="flex flex-wrap mx-6 justify-center">
+				<div class="relative w-100 px-6 flex-[0_0_50%] text-center mb-4">
+					<h2 class="text-black text-lg">
             <img src="/static/img/logo.png" class="logo">
             Environments
           </h2>
 				</div>
 			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<h3 class="h5 mb-4 text-center">
+			<div class="flex flex-wrap mx-6">
+				<div class="relative w-100 px-6 flex-[0_0_100%] max-w-full">
+					<h3 class="text-base text-black font-medium mb-4 text-center">
             <input 
               type="text" 
               id="txt-environment-search" 
@@ -38,8 +31,8 @@
               placeholder="Search.." 
               title="Enter search">
           </h3>
-					<div class="table-wrap">
-						<table style="min-width: 400px !important;" class="table myaccordion table-hover" id="tbl-environments">
+					<div class="flex justify-center items-center overflow-x-scroll h-screen">
+						<table style="min-width: 400px !important;" class="mx-auto myaccordion table-hover" id="tbl-environments">
 						  <thead>
 						    <tr>
 						      <th>Id</th>
@@ -53,13 +46,13 @@
 						  <tbody>
                 {{range .}}
                 <tr data-toggle="collapse" data-target="#environment{{.Id}}" aria-expanded="false" aria-controls="environment{{.Id}}">
-                  <th scope="row">{{.Id}}</th>
+                  <th scope="flex flex-wrap mx-6">{{.Id}}</th>
                   <td>{{.Name}}</td>
                   <td>{{.ProjectId}}</td>
                   <td>{{.ProjectName}}</td>
                   <td>{{.DeletedAt}}</td>
 						      <td>
-						      	<i class="fa" aria-hidden="true"></i>
+						      	<span aria-hidden="true">↑</span>
 				        	</td>
 						    </tr>
 						    <tr>

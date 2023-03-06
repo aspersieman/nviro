@@ -13,12 +13,15 @@ import (
   "io/fs"
   "io/ioutil"
   "log"
+  "mime"
   "net/http"
+  "path/filepath"
   "reflect"
   "regexp"
   "runtime"
   "strconv"
   "strings"
+  "time"
 
 	"github.com/spf13/cobra"
 
@@ -29,9 +32,9 @@ var (
   pages = map[string]string{
     "/": "static/templates/index.html",
   }
-  //go:embed static/css/style.css static/js/* static/templates/index.html static/img/* static/favicon.ico 
+  //go:embed static/css/output.css static/js/* static/templates/index.html static/img/* static/favicon.ico static/img/logo.png
   res embed.FS
-  debug = false
+  debug = true
 )
 
 var serveCmd = &cobra.Command{
@@ -44,17 +47,19 @@ var serveCmd = &cobra.Command{
 }
 
 var routes = []route{
-	newRoute("GET", "/", home),
+	newRoute("GET",  "/", home),
+	newRoute("GET",  "/static/.*", static),
+	newRoute("GET",  "/static/favicon.ico", static),
 
-	newRoute("GET", "/api/projects", apiGetProjects),
-	newRoute("POST", "/api/projects", apiCreateProject),
-	newRoute("PUT", "/api/projects/([0-9]+)", apiUpdateProject),
-	newRoute("DELETE", "/api/projects/([0-9]+)", apiDeleteProject),
+	newRoute("GET",     "/api/projects", apiGetProjects),
+	newRoute("POST",    "/api/projects", apiCreateProject),
+	newRoute("PUT",     "/api/projects/([0-9]+)", apiUpdateProject),
+	newRoute("DELETE",  "/api/projects/([0-9]+)", apiDeleteProject),
 
-	newRoute("GET", "/api/environments", apiGetEnvironments),
-	newRoute("POST", "/api/environments", apiCreateEnvironment),
-	newRoute("PUT", "/api/environments/([0-9]+)", apiUpdateEnvironment),
-	newRoute("DELETE", "/api/environments/([0-9]+)", apiDeleteEnvironment),
+	newRoute("GET",     "/api/environments", apiGetEnvironments),
+	newRoute("POST",    "/api/environments", apiCreateEnvironment),
+	newRoute("PUT",     "/api/environments/([0-9]+)", apiUpdateEnvironment),
+	newRoute("DELETE",  "/api/environments/([0-9]+)", apiDeleteEnvironment),
 }
 
 type ctxKey struct{}
@@ -64,9 +69,9 @@ type ProjectUpdate struct {
 }
 
 type EnvironmentUpdate struct {
-	Name string `json:"name"`
-  Content string `json:"content"`
-  ProjectId int `json:"project_id"`
+	Name      string `json:"name"`
+  Content   string `json:"content"`
+  ProjectId int    `json:"project_id"`
 }
 
 type route struct {
@@ -90,7 +95,6 @@ func newRoute(method, pattern string, handler http.HandlerFunc) route {
 
 func home(w http.ResponseWriter, r *http.Request) {
   page, ok := pages[r.URL.Path]
-  fmt.Printf("Requested file: %s\n", page)
   if !ok {
     w.WriteHeader(http.StatusNotFound)
     return
@@ -112,9 +116,29 @@ func home(w http.ResponseWriter, r *http.Request) {
   environments := db.EnvironmentList(true)
   err = tpl.ExecuteTemplate(w, "layout", environments)
   if err != nil {
-    log.Print(err.Error())
+    log.Printf("ERROR: Cannot parse template 'layout'. %s", err.Error())
     http.Error(w, http.StatusText(500), 500)
   }
+}
+
+func static(w http.ResponseWriter, r *http.Request) {
+  path := r.URL.Path
+  path = path[1:]
+  file, err := res.ReadFile(path)
+  if err != nil {
+    log.Printf("ERROR: Cannot find static file %s. %s", file, err.Error())
+    http.Error(w, http.StatusText(404), 404)
+    return
+  }
+  ext := filepath.Ext(path)
+  mimeType := mime.TypeByExtension(ext)
+  log.Printf("Serving static file %s (%s)", path, mimeType)
+  if mimeType == "" {
+    mimeType = http.DetectContentType(file)
+  }
+  log.Printf("mimeType: %s", mimeType)
+  w.Header().Set("Content-Type", mimeType)
+  w.Write(file)
 }
 
 func apiGetProjects(w http.ResponseWriter, r *http.Request) {
@@ -205,14 +229,11 @@ func apiDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
   }
 }
 
-func getFunctionName(temp interface{}) string {
-  strs := strings.Split((runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name()), ".")
-  return strs[len(strs)-1]
-}
-
 func loggingMiddleware(next http.HandlerFunc, method string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    log.Printf("INFO: Request: [%s] %s => %s", method, r.URL.Path, getFunctionName(next))
+    f := getFunctionName(next)
+    defer timeTrack(time.Now(), f)
+    log.Printf("INFO: Request: [%s] %s => %s", method, r.URL.Path, f)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -247,11 +268,13 @@ func start() {
       fmt.Printf("INFO:\t- %s\n", f) 
     }
   }
-  fmt.Println()
-  http.Handle("/static/", http.FileServer(http.FS(res)))
-  http.Handle("/favicon.ico", http.FileServer(http.FS(res)))
   p := "6969"
   log.Printf("INFO: Server started at :%s\n", p)
+  http.Handle("favicon.ico", http.FileServer(http.FS(res)))
+  http.Handle("static/", http.FileServer(http.FS(res)))
+  http.Handle("static/img/", http.FileServer(http.FS(res)))
+  http.Handle("static/js/", http.FileServer(http.FS(res)))
+  http.Handle("static/css/", http.FileServer(http.FS(res)))
   err := http.ListenAndServe(":" + p, http.HandlerFunc(Serve))
   if err != nil {
     panic(err)
@@ -272,6 +295,16 @@ func getAllFilenames(efs *embed.FS) (files []string, err error) {
   }
 
   return files, nil
+}
+
+func getFunctionName(temp interface{}) string {
+  strs := strings.Split((runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name()), ".")
+  return strs[len(strs)-1]
+}
+
+func timeTrack(start time.Time, name string) {
+  elapsed := time.Since(start)
+  log.Printf("INFO: %s took %s", name, elapsed)
 }
 
 func init() {

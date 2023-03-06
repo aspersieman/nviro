@@ -17,3 +17,4 @@ storage/db.sqlite3
 ./nviro
 bin
 bin/.gitkeep
+node_modules

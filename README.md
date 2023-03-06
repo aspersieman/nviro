@@ -12,3 +12,4 @@
    - DONE Allow CRUD actions from UI for projects, environments
    - DONE User better routing to handle query params: https://github.com/benhoyt/go-routing/blob/master/retable/route.go
  - Write tests
+ - Address all linter issues
