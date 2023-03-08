@@ -14,3 +14,22 @@ const filterEnvironments = () => {
 
   trs.forEach(setTrStyleDisplay)
 }
+
+const getEnvironments = async () => {
+  const response = await fetch("/api/environments");
+  const environments = await response.json();
+  return environments;
+}
+
+const getProjects = async () => {
+  const response = await fetch("/api/projects");
+  const projects = await response.json();
+  return projects;
+}
+
+getEnvironments().then((environments) => {
+  console.log(environments)
+})
+getProjects().then((projects) => {
+  console.log(projects)
+})
