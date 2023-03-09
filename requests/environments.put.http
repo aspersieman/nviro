@@ -1,0 +1,9 @@
+PUT http://localhost:6969/api/environments/{{ENVIRONMENT_UPDATE_ID}}
+Content-Type: application/json
+
+{
+  "name": "{{ENVIRONMENT_UPDATE_NAME}}",
+  "content": "{{ENVIRONMENT_UPDATE_CONTENT}}",
+  "project_id": {{ENVIRONMENT_UPDATE_PROJECT_ID}}
+}
+

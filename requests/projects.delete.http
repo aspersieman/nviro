@@ -1,0 +1,1 @@
+DELETE http://localhost:6969/api/projects/{{PROJECT_DELETE_ID}}

@@ -1,0 +1,8 @@
+POST http://localhost:6969/api/environments
+Content-Type: application/json
+
+{
+  "name": "{{ENVIRONMENT_CREATE_NAME}}",
+  "content": "{{ENVIRONMENT_CREATE_CONTENT}}",
+  "project_id": {{ENVIRONMENT_CREATE_PROJECT_ID}}
+}

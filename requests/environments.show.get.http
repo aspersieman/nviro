@@ -1,0 +1,1 @@
+GET http://localhost:6969/api/environments/{{ENVIRONMENT_SHOW_ID}}

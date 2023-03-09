@@ -1,0 +1,6 @@
+POST http://localhost:6969/api/projects
+Content-Type: application/json
+
+{
+  "name": "{{PROJECT_CREATE_NAME}}"
+}

@@ -1,0 +1,6 @@
+PUT http://localhost:6969/api/projects/6
+Content-Type: application/json
+
+{
+  "name": "{{PROJECT_UPDATE_NAME}}"
+}

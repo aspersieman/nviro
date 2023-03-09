@@ -57,6 +57,7 @@ var routes = []route{
 	newRoute("DELETE",  "/api/projects/([0-9]+)", apiDeleteProject),
 
 	newRoute("GET",     "/api/environments", apiGetEnvironments),
+	newRoute("GET",     "/api/environments/([0-9]+)", apiShowEnvironment),
 	newRoute("POST",    "/api/environments", apiCreateEnvironment),
 	newRoute("PUT",     "/api/environments/([0-9]+)", apiUpdateEnvironment),
 	newRoute("DELETE",  "/api/environments/([0-9]+)", apiDeleteEnvironment),
@@ -227,6 +228,13 @@ func apiDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     log.Fatal(err)
   }
+}
+
+func apiShowEnvironment(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Content-Type", "application/json")
+  id, _ := strconv.Atoi(getField(r, 0))
+  environment := db.EnvironmentShow(id)
+  json.NewEncoder(w).Encode(environment)
 }
 
 func loggingMiddleware(next http.HandlerFunc, method string) http.HandlerFunc {
