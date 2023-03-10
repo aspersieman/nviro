@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="/static/css/output.css">
   <script defer type="text/javascript" src="/static/js/alpine.min.js"></script>
-  <script defer type="text/javascript" src="/static/js/script.js"></script>
+  <script type="text/javascript" src="/static/js/script.js"></script>
   <link rel="shortcut icon" type="image/jpg" href="/static/favicon.ico"/>
 </head>
 <body>
@@ -21,46 +21,77 @@
           </h2>
 				</div>
 			</div>
+      <ul
+      >
+      </ul>
 			<div class="flex flex-wrap mx-6">
 				<div class="relative w-100 px-6 flex-[0_0_100%] max-w-full">
-					<h3 class="text-base text-black font-medium mb-4 text-center">
+					<h3
+            class="text-base text-black font-medium mb-4 text-center"
+            x-data="{ projectId: null }"
+          >
             <input 
               type="text" 
               id="txt-environment-search" 
               onkeyup="filterEnvironments()" 
               placeholder="Search.." 
-              title="Enter search">
+              title="Enter search"
+            >
+            <select
+              name="projects"
+              id="sel-projects"
+              x-model="projectId"
+              x-data="alpineInstance()"
+              x-init="
+                fetch('/api/projects')
+                  .then(response => response.json())
+                  .then(data => projects = data)
+              "
+            >
+                <option value="all">All</option>
+                <template x-for="(project, index) in projects" :key="index">
+                  <option x-bind:value="project.id" x-text="project.name"></option>
+                </template>
+            </select>
+            Selected: <span x-text="projectId"></span>
           </h3>
-					<div class="flex justify-center items-center overflow-x-scroll h-screen">
-						<table style="min-width: 400px !important;" class="mx-auto myaccordion table-hover" id="tbl-environments">
-						  <thead>
+					<div class="flex justify-center overflow-x-scroll">
+						<table style="min-width: 400px !important;" class="mx-auto myaccordion table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-environments">
+						  <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 						    <tr>
-						      <th>Id</th>
-						      <th>Name</th>
-						      <th>Project Id</th>
-						      <th>Project Name</th>
-						      <th>Deleted At</th>
-						      <th>&nbsp;</th>
+						      <th scope="col" class="px-6 py-3">Id</th>
+						      <th scope="col" class="px-6 py-3">Name</th>
+						      <th scope="col" class="px-6 py-3">Project Id</th>
+						      <th scope="col" class="px-6 py-3">Project Name</th>
+						      <th scope="col" class="px-6 py-3">Deleted At</th>
+						      <th scope="col" class="px-6 py-3">&nbsp;</th>
 						    </tr>
 						  </thead>
-						  <tbody>
-                {{range .}}
-                <tr data-toggle="collapse" data-target="#environment{{.Id}}" aria-expanded="false" aria-controls="environment{{.Id}}">
-                  <th scope="flex flex-wrap mx-6">{{.Id}}</th>
-                  <td>{{.Name}}</td>
-                  <td>{{.ProjectId}}</td>
-                  <td>{{.ProjectName}}</td>
-                  <td>{{.DeletedAt}}</td>
-						      <td>
-						      	<span aria-hidden="true">↑</span>
-				        	</td>
-						    </tr>
-						    <tr>
-						    	<td colspan="6" id="environment{{.Id}}" class="collapse acc" data-parent="#tbl-environments">
-                    <code style="white-space: pre;">{{.Content}}</code>
-						    	</td>
-						    </tr>
-                {{end}}
+						  <tbody
+                x-data="alpineInstance()"
+                x-init="
+                  fetch('/api/environments')
+                    .then(response => response.json())
+                    .then(data => environments = data)
+                "
+              >
+                <template x-for="(environment, index) in environments" :key="index">
+                  <tr data-toggle="collapse" aria-expanded="false" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <th scope="row" x-text="environment.id" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
+                    <td scope="row" x-text="environment.name" class="px-6 py-4"></td>
+                    <td scope="row" x-text="environment.project_id" class="px-6 py-4"></td>
+                    <td scope="row" x-text="environment.project_name" class="px-6 py-4"></td>
+                    <td scope="row" x-text="environment.deleted_at" class="px-6 py-4"></td>
+                    <td scope="row" class="px-6 py-4">
+                      <span aria-hidden="true">↑</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="6" x-bind:id="environment.id" class="collapse acc">
+                      <code x-text="environment.content" style="white-space: pre;"></code>
+                    </td>
+                  </tr>
+                </template>
 						  </tbody>
 						</table>
 					</div>

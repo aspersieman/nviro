@@ -15,6 +15,7 @@ import (
   "log"
   "mime"
   "net/http"
+  "os"
   "path/filepath"
   "reflect"
   "regexp"
@@ -24,6 +25,7 @@ import (
   "time"
 
 	"github.com/spf13/cobra"
+  "github.com/joho/godotenv"
 
   "nviro/db"
 )
@@ -313,6 +315,17 @@ func getFunctionName(temp interface{}) string {
 func timeTrack(start time.Time, name string) {
   elapsed := time.Since(start)
   log.Printf("INFO: %s took %s", name, elapsed)
+}
+
+func goDotEnvVariable(key string) string {
+  // load .env file
+  err := godotenv.Load(".env")
+
+  if err != nil {
+    log.Fatalf("Error loading .env file")
+  }
+
+  return os.Getenv(key)
 }
 
 func init() {

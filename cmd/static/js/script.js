@@ -33,3 +33,11 @@ getEnvironments().then((environments) => {
 getProjects().then((projects) => {
   console.log(projects)
 })
+
+function alpineInstance() {
+  return {
+    // we'll set our data to hold an object
+    environments: [],
+    projects: [],
+  }
+}
