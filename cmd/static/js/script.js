@@ -27,17 +27,33 @@ const getProjects = async () => {
   return projects;
 }
 
-getEnvironments().then((environments) => {
-  console.log(environments)
-})
-getProjects().then((projects) => {
-  console.log(projects)
-})
+const createEnvironment = async (
+  name,
+  content,
+  project_id
+) => {
+  const response = await fetch("/api/environments", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name,
+      content,
+      project_id
+    })
+  });
+  const environment = await response.json();
+  return environment; 
+}
 
 function alpineInstance() {
   return {
-    // we'll set our data to hold an object
     environments: [],
     projects: [],
-  }
+    showEnvironmentAddModal: false,
+    getEnvironments,
+    getProjects,
+    createEnvironment
+  }    
 }

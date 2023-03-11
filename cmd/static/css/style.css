@@ -7,4 +7,26 @@
   margin: auto;
   max-width: 128px;
 }
+@keyframes rotate {
+  0% { transform: rotate(0deg) scale(1.0); }
+  100% { transform: rotate(360deg) scale(1.5); }
+}
+@keyframes rori {
+  0% { transform: rotate(360deg) scale(1.5); }
+  100% { transform: rotate(0deg) scale(1.0); }
+}
+img.logo:hover {
+  animation-name: rotate;
+  animation-duration: 500ms;
+  animation-iteration-count: 1;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
+img.logo {
+  animation-name: rori;
+  animation-duration: 500ms;
+  animation-iteration-count: 1;
+  animation-timing-function: ease;
+  vertical-align: middle;
+}
 /* Custom */

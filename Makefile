@@ -16,6 +16,6 @@ static:
 	npx tailwindcss -i ./cmd/static/css/style.css -o ./cmd/static/css/output.css
 
 static-watch:
-	cd cmd/static/js && npx tailwindcss -i ./../css/style.css -o ./../css/output.css --watch
+	npx tailwindcss -i ./cmd/static/css/style.css -o ./cmd/static/css/output.css --watch
 
 all: build
