@@ -4,8 +4,8 @@
    - DONE Create favicon
    - DONE Create landing image
    - DONE Embed static/* into binary
-   - Convert to Alpine.js
-   - Convert to tailwind
+   - DONE Convert to Alpine.js
+   - DONE Convert to tailwind
    - List projects separately
  - API
    - DONE IN PROGRESS Create CRUD API endpoints for projects, environments

@@ -10,9 +10,14 @@
   <script type="text/javascript" src="/static/js/script.js"></script>
   <link rel="shortcut icon" type="image/jpg" href="/static/favicon.ico"/>
 </head>
-<body class="bg-gray-400" x-data="alpineInstance()">
+<body
+  class="bg-gray-400"
+  x-data
+  x-init="$store.main.init()"
+>
   <div
-    x-show="showEnvironmentAddModal"
+    x-data
+    x-show="$store.main.showEnvironmentAddModal"
     id="create-environment-modal"
     tabindex="-1"
     aria-hidden="true"
@@ -20,34 +25,141 @@
   >
     <div class="relative w-full h-full max-w-md md:h-auto !m-auto">
       <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-        <button @click="showEnvironmentAddModal = false" type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white" data-modal-hide="authentication-modal">
+        <button
+          @click="$store.main.showEnvironmentAddModal = false"
+          type="button"
+          class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+        >
           <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
           <span class="sr-only">Close modal</span>
         </button>
         <div class="px-6 py-6 lg:px-8">
-          <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Sign in to our platform</h3>
-          <form class="space-y-6" action="#">
+          <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add new environment</h3>
+          <form
+            class="space-y-6"
+            x-data
+            onsubmit="event.preventDefault();"
+          >
             <div>
-              <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-              <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="name@company.com" required>
+              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="fil-environment-add-content">Upload file</label>
+              <input
+                @change="(e) => {
+                  const fr = new FileReader();
+                  fr.onload = () => {
+                    $store.main.environmentContent = fr.result;
+                    $store.main.environmentName = e.target.files[0].name;
+                  }
+                  fr.readAsText(e.target.files[0]);
+                }"
+                class="block w-full h-10 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                id="fil-environment-add-content"
+                name="fil-environment-add-content"
+                type="file"
+              >
             </div>
             <div>
-              <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-              <input type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+              <label for="txt-environment-add-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+              <input
+                x-model="$store.main.environmentName"
+                type="text"
+                name="txt-environment-add-name"
+                id="txt-environment-add-name"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                placeholder=".env.example"
+                required
+              >
             </div>
-            <div class="flex justify-between">
-              <div class="flex items-start">
-                <div class="flex items-center h-5">
-                  <input id="remember" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required>
-                </div>
-                <label for="remember" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Remember me</label>
-              </div>
-              <a href="#" class="text-sm text-blue-700 hover:underline dark:text-blue-500">Lost Password?</a>
+            <div>
+              <label for="sel-environment-add-project" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Project</label>
+              <select
+                name="sel-environment-add-project"
+                id="sel-environment-add-project"
+                x-model="$store.main.environmentProjectId"
+                class="
+                  flex
+                  bg-gray-50
+                  border
+                  border-gray-300
+                  text-gray-900
+                  text-sm
+                  rounded-lg
+                  focus:ring-blue-500
+                  focus:border-blue-500
+                  p-2.5
+                  h-10
+                  dark:bg-gray-700
+                  dark:border-gray-600
+                  dark:placeholder-gray-400
+                  dark:text-white
+                  dark:focus:ring-blue-500
+                  dark:focus:border-blue-500
+               "
+              >
+                <template x-for="(project, index) in $store.main.projects" :key="index">
+                  <option x-bind:value="project.id" x-text="project.name"></option>
+                </template>
+              </select>
             </div>
-            <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login to your account</button>
-            <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-              Not registered? <a href="#" class="text-blue-700 hover:underline dark:text-blue-500">Create account</a>
+            <button
+              @click="$store.main.createEnvironment(
+                $store.main.environmentName,
+                $store.main.environmentContent,
+                $store.main.environmentProjectId
+              )"
+              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Add Environment
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div> 
+  <div
+    x-data
+    x-show="$store.main.showProjectAddModal"
+    id="create-project-modal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full"
+  >
+    <div class="relative w-full h-full max-w-md md:h-auto !m-auto">
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <button
+          @click="$store.main.showProjectAddModal = false"
+          type="button"
+          class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+        >
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+        <div class="px-6 py-6 lg:px-8">
+          <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add new project</h3>
+          <form
+            class="space-y-6"
+            x-data
+            onsubmit="event.preventDefault();"
+          >
+            <div>
+              <label for="txt-project-add-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+              <input
+                x-model="$store.main.projectName"
+                type="text"
+                name="txt-project-add-name"
+                id="txt-project-add-name"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                placeholder="Project name..."
+                required
+              >
             </div>
+            <button
+              @click="$store.main.createProject(
+                $store.main.projectName
+              )"
+              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Add Project
+            </button>
           </form>
         </div>
       </div>
@@ -65,43 +177,61 @@
 			</div>
 			<div class="flex flex-wrap mx-6">
 				<div class="relative w-100 px-6 flex-[0_0_100%] max-w-full">
-					<h3
-            class="text-base text-black font-medium mb-4 text-center"
-            x-data="{ projectId: null }"
+					<div
+            class="mb-4 flex space-x-4 items-stretch justify-center"
+            x-data
           >
-            <input 
-              type="text" 
-              id="txt-environment-search" 
-              onkeyup="filterEnvironments()" 
-              placeholder="Search.." 
-              title="Enter search"
-              class="
-                 bg-gray-50
-                 border
-                 border-gray-300
-                 text-gray-900
-                 text-sm
-                 rounded-lg
-                 focus:ring-blue-500
-                 focus:border-blue-500
-                 p-2.5
-                 dark:bg-gray-700
-                 dark:border-gray-600
-                 dark:placeholder-gray-400
-                 dark:text-white
-                 dark:focus:ring-blue-500
-                 dark:focus:border-blue-500
-              "
-            >
+            <div class="relative flex h-10" x-data>
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+              </div>
+              <input
+                x-data
+                id="txt-environment-search" 
+                x-model="$store.main.environmentSearch"
+                @keyup="$store.main.filterEnvironmentsName()" 
+                type="text"
+                class="
+                  bg-gray-50
+                  border
+                  border-gray-300
+                  text-gray-900
+                  text-sm
+                  rounded-lg
+                  focus:ring-blue-500
+                  focus:border-blue-500
+                  block
+                  w-full
+                  h-10
+                  pl-10
+                  p-2.5
+                  dark:bg-gray-700
+                  dark:border-gray-600
+                  dark:placeholder-gray-400
+                  dark:text-white
+                  dark:focus:ring-blue-500
+                  dark:focus:border-blue-500
+                "
+
+                placeholder="Search.." 
+              >
+              <button
+                @click="$store.main.clearSearch()"
+                type="button"
+                class="absolute inset-y-0 right-0 flex items-center pr-3"
+              >
+                <svg aria-hidden="true" class="w-4 h-4 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+            </div>
             <select
               name="projects"
               id="sel-projects"
-              x-model="projectId"
-              x-init="
-                getProjects()
-                  .then(data => projects = data)
-              "
+              x-model="$store.main.projectId"
+              @change="$store.main.filterEnvironmentsProject()"
               class="
+                flex
                 bg-gray-50
                 border
                 border-gray-300
@@ -111,6 +241,7 @@
                 focus:ring-blue-500
                 focus:border-blue-500
                 p-2.5
+                h-10
                 dark:bg-gray-700
                 dark:border-gray-600
                 dark:placeholder-gray-400
@@ -120,20 +251,27 @@
              "
             >
                 <option value="all">All</option>
-                <template x-for="(project, index) in projects" :key="index">
+                <template x-for="(project, index) in $store.main.projects" :key="index">
                   <option x-bind:value="project.id" x-text="project.name"></option>
                 </template>
             </select>
             <button
               type="button"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-              @click="showEnvironmentAddModal = true"
+              class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              @click="$store.main.showEnvironmentAddModal = true"
             >
-              Add Environment
+              New Environment
             </button>
-          </h3>
+            <button
+              type="button"
+              class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              @click="$store.main.showProjectAddModal = true"
+            >
+              New Project
+            </button>
+          </div>
           <h3 class="text-gray-700 text-md text-center font-bold">Environments</h3>
-					<div class="flex justify-center overflow-x-scroll rounded-lg">
+					<div class="flex justify-center rounded-lg">
             <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
               <table style="min-width: 400px !important;" class="mx-auto myaccordion table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-environments">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -147,13 +285,9 @@
                   </tr>
                 </thead>
                 <template
-                  x-for="(environment, index) in environments"
-                  :key="index"
-                  x-data="alpineInstance()"
-                  x-init="
-                    getEnvironments()
-                      .then(data => environments = data)
-                  "
+                  x-data
+                  x-for="(environment, index) in $store.main.environments"
+                  :key="environment.id"
                 >
                   <tbody x-data="{ showEnvFile: false }">
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
@@ -162,9 +296,38 @@
                       <td scope="row" x-text="environment.project_id" class="px-6 py-4"></td>
                       <td scope="row" x-text="environment.project_name" class="px-6 py-4"></td>
                       <td scope="row" x-text="environment.deleted_at" class="px-6 py-4"></td>
-                      <td scope="row" class="px-6 py-4 cursor-pointer" @click="showEnvFile = ! showEnvFile">
-                        <span x-show="showEnvFile">↑</span>
-                        <span x-show="!showEnvFile">↓</span>
+                      <td scope="row" class="px-6 py-4 cursor-pointer">
+                        <button
+                          @click="$store.main.downloadContent(environment.name, environment.content)"
+                          type="button"
+                          class="btn-env-action"
+                        >
+                          Download
+                        </button>
+                        <button
+                          @click="showEnvFile = false"
+                          x-show="showEnvFile"
+                          type="button"
+                          class="btn-env-action"
+                        >
+                          Hide
+                        </button>
+                        <button
+                          @click="showEnvFile = true"
+                          x-show="!showEnvFile"
+                          type="button"
+                          class="btn-env-action"
+                        >
+                          Show
+                        </button>
+                        <button
+                          x-show="!environment.deleted_at"
+                          @click="$store.main.deleteEnvironment(environment.id)"
+                          type="button"
+                          class="btn-env-delete"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                     <tr x-show.transition.in="showEnvFile" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
