@@ -17,3 +17,11 @@
    - DONE User better routing to handle query params: https://github.com/benhoyt/go-routing/blob/master/retable/route.go
  - Write tests
  - Address all linter issues
+ - Upgrade deprecation warning in serve.go
+ - Fix README so it looks presentable on github
+ - Check for os correctly - store db appropriately
+ - Create basic .env if not exists (and not already present in home dir)
+ - Use .env for:
+   - setting app_env
+   - Storing .env
+   - Storing db
