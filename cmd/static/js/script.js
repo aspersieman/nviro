@@ -1,11 +1,15 @@
 document.addEventListener('alpine:init', () => {
   Alpine.store('main', {
+    activeTab: 'environments',
+    showProjectAddModal: false,
+    projects: [],
+    projectId: 'all',
+    projectName: null,
+    projectSearch: '',
     showEnvironmentAddModal: false,
     environments: [],
-    environmentSearch: null,
-    projects: [],
-    projectId: null,
-    projectName: null,
+    environmentListDeleted: false,
+    environmentSearch: '',
     environmentName: null,
     environmentProjectId: null,
     environmentContent: null,
@@ -15,27 +19,28 @@ document.addEventListener('alpine:init', () => {
       this.getEnvironments();
     },
 
-    async getEnvironments() {
-      const response = await fetch("/api/environments");
-      const environments = await response.json();
-      this.environments = environments;
+    projectList() {
+      return this.projects.filter(project => {
+        return this.projectSearch === null || project.name.toLowerCase().includes(this.projectSearch.toLowerCase()); 
+      })
     },
 
+
     async getProjects() {
-      const response = await fetch("/api/projects");
+      const response = await fetch('/api/projects');
       const projects = await response.json();
       this.projects = projects;
     },
 
     async createProject(name) {
       if (name) {
-        const response = await fetch("/api/projects", {
-          method: "POST",
+        const response = await fetch('/api/projects', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            "name": name
+            'name': name
           })
         });
         this.clearProjectAddModal();
@@ -46,37 +51,71 @@ document.addEventListener('alpine:init', () => {
       return
     },
 
+    deleteProject(id) {
+      if (id) {
+        fetch('/api/projects/' + id, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(() => {
+          window.location.reload();
+        });
+      }
+    },
+
     async createEnvironment(
       name,
       content,
       project_id
     ) {
       if (name && content && project_id) {
-        const response = await fetch("/api/environments", {
-          method: "POST",
+        const response = await fetch('/api/environments', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            "name": name,
-            "content": content,
-            "project_id": parseInt(project_id)
+            'name': name,
+            'content': content,
+            'project_id': parseInt(project_id)
           })
         });
         this.clearEnvironmentAddModal();
         this.showEnvironmentAddModal = false;
         this.getEnvironments();
         return response
+      } else {
+        console.log('createEnvironment: stopped: ', name, content, project_id);
       }
       return
     },
 
+    environmentList() {
+      return this.environments.filter(environment => {
+        return environment.name.toLowerCase().includes(this.environmentSearch.toLowerCase()) && (
+          this.projectId === 'all' || parseInt(environment.project_id) === parseInt(this.projectId)
+        );
+      })
+    },
+
+    async getEnvironments() {
+      const paramDeleted = this.environmentListDeleted ? 'true' : 'false';
+      const url = (
+        '/api/environments?' +
+        new URLSearchParams({ deleted: paramDeleted }).toString()
+      );
+      const response = await fetch(url);
+      const environments = await response.json();
+      this.environments = environments;
+    },
+
     deleteEnvironment(id) {
       if (id) {
-        fetch("/api/environments/" + id, {
-          method: "DELETE",
+        fetch('/api/environments/' + id, {
+          method: 'DELETE',
           headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
           }
         }).then(() => {
           window.location.reload();
@@ -85,7 +124,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     async downloadContent(name, content) {
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.download = name.toString();
 
       const file = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -95,30 +134,20 @@ document.addEventListener('alpine:init', () => {
       URL.revokeObjectURL(link.href);
     },
 
-    filterEnvironmentsName() {
-      this.environments = this.environments.filter(environment => {
-        return environment.name.toLowerCase().includes(this.environmentSearch.toLowerCase()); 
-      })
+    setActiveTab(tabName) {
+      this.activeTab = tabName;
     },
 
-    filterEnvironmentsProject() {
-      console.log('filterEnvironmentsProject: ', this.projectId);
-      if (this.projectId === "all") {
-        this.getEnvironments();
-        return
-      }
-      const self = this;
-      this.getEnvironments().then(() => {
-        self.environments = self.environments.filter((environment) => {
-          const include = parseInt(environment.project_id) === parseInt(self.projectId)
-          console.log('filterEnvironmentsProject: ', environment.project_name, environment.name, 'env project id ', environment.project_id, include);
-          return include; 
-        })
-      })
+    clearProjectSearch() {
+      this.projectSearch = '';
     },
 
-    clearSearch() {
-      this.environmentSearch = null;
+    clearProjectAddModal() {
+      this.projectName = null;
+    },
+
+    clearEnvironmentSearch() {
+      this.environmentSearch = '';
       this.getEnvironments();
     },
 
@@ -127,9 +156,5 @@ document.addEventListener('alpine:init', () => {
       this.environmentProjectId = null;
       this.environmentContent = null;
     },
-
-    clearProjectAddModal() {
-      this.projectName = null;
-    }
   })
 })

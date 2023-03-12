@@ -59,6 +59,7 @@ var routes = []route{
 	newRoute("DELETE",  "/api/projects/([0-9]+)", apiDeleteProject),
 
 	newRoute("GET",     "/api/environments", apiGetEnvironments),
+	newRoute("GET",     "/api/environments?[a-zA-Z0-9_&]*", apiGetEnvironments),
 	newRoute("GET",     "/api/environments/([0-9]+)", apiShowEnvironment),
 	newRoute("POST",    "/api/environments", apiCreateEnvironment),
 	newRoute("PUT",     "/api/environments/([0-9]+)", apiUpdateEnvironment),
@@ -75,6 +76,10 @@ type EnvironmentUpdate struct {
 	Name      string `json:"name"`
   Content   string `json:"content"`
   ProjectId int    `json:"project_id"`
+}
+
+type EnvironmentListParameters struct {
+  Deleted bool    `json:"deleted"`
 }
 
 type route struct {
@@ -141,20 +146,31 @@ func static(w http.ResponseWriter, r *http.Request) {
   }
   log.Printf("mimeType: %s", mimeType)
   w.Header().Set("Content-Type", mimeType)
-  w.Write(file)
+  _, err = w.Write(file)
+  if err != nil {
+    log.Printf("ERROR: Cannot write response. %s", err.Error())
+    http.Error(w, http.StatusText(500), 500)
+  }
 }
 
 func apiGetProjects(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   environments := db.ProjectList()
-  json.NewEncoder(w).Encode(environments)
+  err := json.NewEncoder(w).Encode(environments)
+  if err != nil {
+    log.Printf("ERROR: Cannot encode response. %s", err.Error())
+    http.Error(w, http.StatusText(500), 500)
+  }
 }
 
 func apiCreateProject(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
+  if err != nil {
+    log.Fatal(err)
+  }
   var project ProjectUpdate
-  json.Unmarshal([]byte(reqBody), &project)
+  err = json.Unmarshal([]byte(reqBody), &project)
   if err != nil {
     log.Fatal(err)
   }
@@ -167,8 +183,11 @@ func apiCreateProject(w http.ResponseWriter, r *http.Request) {
 func apiUpdateProject(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
+  if err != nil {
+    log.Fatal(err)
+  }
   var project ProjectUpdate
-  json.Unmarshal([]byte(reqBody), &project)
+  err = json.Unmarshal([]byte(reqBody), &project)
   if err != nil {
     log.Fatal(err)
   }
@@ -190,15 +209,23 @@ func apiDeleteProject(w http.ResponseWriter, r *http.Request) {
 
 func apiGetEnvironments(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
-  environments := db.EnvironmentList(true)
-  json.NewEncoder(w).Encode(environments)
+  deleted := r.URL.Query().Get("deleted")
+  del, _ := strconv.ParseBool(deleted)
+  environments := db.EnvironmentList(del)
+  err := json.NewEncoder(w).Encode(environments)
+  if err != nil {
+    log.Fatal(err)
+  }
 }
 
 func apiCreateEnvironment(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
+  if err != nil {
+    log.Fatal(err)
+  }
   var environment EnvironmentUpdate
-  json.Unmarshal([]byte(reqBody), &environment)
+  err = json.Unmarshal([]byte(reqBody), &environment)
   if err != nil {
     log.Fatal(err)
   }
@@ -211,8 +238,11 @@ func apiCreateEnvironment(w http.ResponseWriter, r *http.Request) {
 func apiUpdateEnvironment(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   reqBody, err := ioutil.ReadAll(r.Body)
+  if err != nil {
+    log.Fatal(err)
+  }
   var environment EnvironmentUpdate
-  json.Unmarshal([]byte(reqBody), &environment)
+  err = json.Unmarshal([]byte(reqBody), &environment)
   if err != nil {
     log.Fatal(err)
   }
@@ -236,7 +266,10 @@ func apiShowEnvironment(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   id, _ := strconv.Atoi(getField(r, 0))
   environment := db.EnvironmentShow(id)
-  json.NewEncoder(w).Encode(environment)
+  err := json.NewEncoder(w).Encode(environment)
+  if err != nil {
+    log.Fatal(err)
+  }
 }
 
 func loggingMiddleware(next http.HandlerFunc, method string) http.HandlerFunc {
@@ -318,7 +351,6 @@ func timeTrack(start time.Time, name string) {
 }
 
 func goDotEnvVariable(key string) string {
-  // load .env file
   err := godotenv.Load(".env")
 
   if err != nil {

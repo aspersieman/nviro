@@ -6,7 +6,11 @@
    - DONE Embed static/* into binary
    - DONE Convert to Alpine.js
    - DONE Convert to tailwind
-   - List projects separately
+   - DONE List projects separately
+   - Edit environment
+   - Edit project
+   - Validation for forms
+   - Show/hide deleted
  - API
    - DONE IN PROGRESS Create CRUD API endpoints for projects, environments
    - DONE Allow CRUD actions from UI for projects, environments

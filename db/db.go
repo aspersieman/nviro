@@ -106,6 +106,7 @@ type Project struct {
 	Name string `json:"name"`
   CreatedAt string `json:"created_at"`
   UpdatedAt string `json:"updated_at"`
+  EnvironmentCount int `json:"environment_count"`
 }
 
 func ProjectInsert(name string) error {
@@ -148,7 +149,12 @@ func ProjectUpdate(id int, name string) error {
 }
 
 func ProjectList() []Project {
-  rows, err := db.Query("SELECT * FROM projects ORDER BY name ASC")
+  rows, err := db.Query(`
+    SELECT
+      projects.*,
+      (SELECT COUNT(*) FROM environments WHERE project_id = projects.id) AS environments_count
+    FROM projects ORDER BY name ASC
+  `)
   if err != nil {
     log.Fatal(err.Error())
   }
@@ -159,7 +165,8 @@ func ProjectList() []Project {
     var name string
     var created_at sql.NullString
     var updated_at sql.NullString
-    err = rows.Scan(&id, &name, &created_at, &updated_at)
+    var environment_count int
+    err = rows.Scan(&id, &name, &created_at, &updated_at, &environment_count)
     if err != nil {
       log.Fatal(err.Error())
     }
@@ -168,6 +175,7 @@ func ProjectList() []Project {
       name,
       created_at.String,
       updated_at.String,
+      environment_count,
     })
   }
 

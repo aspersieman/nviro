@@ -31,15 +31,16 @@ func projectList() {
   projects := db.ProjectList()
 
   w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-  fmt.Fprintln(w, "ID\tNAME\tCREATED AT\tUPDATED AT")
-  fmt.Fprintln(w, "--\t----\t----------\t----------")
+  fmt.Fprintln(w, "ID\tNAME\tCREATED AT\tUPDATED AT\tENVIRONMENTS")
+  fmt.Fprintln(w, "--\t----\t----------\t----------\t------------")
 	for _, project := range projects {
     data := fmt.Sprintf(
-      "%d\t%s\t%s\t%s",
+      "%d\t%s\t%s\t%s\t%d",
       project.Id,
       project.Name,
       project.CreatedAt,
       project.UpdatedAt,
+      project.EnvironmentCount,
     )
     fmt.Fprintln(w, data)
   }
