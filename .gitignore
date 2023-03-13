@@ -16,5 +16,6 @@
 storage/db.sqlite3
 ./nviro
 bin
-bin/.gitkeep
+!bin/.gitkeep
+!bin/desktop-launch.sh
 node_modules
