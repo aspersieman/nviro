@@ -10,6 +10,7 @@ document.addEventListener('alpine:init', () => {
     environments: [],
     environmentListDeleted: false,
     environmentSearch: '',
+    environmentId: null,
     environmentName: null,
     environmentProjectId: null,
     environmentContent: null,
@@ -152,9 +153,24 @@ document.addEventListener('alpine:init', () => {
     },
 
     clearEnvironmentAddModal() {
+      this.environmentId = null;
       this.environmentName = null;
       this.environmentProjectId = null;
       this.environmentContent = null;
     },
+    
+    environmentAddModalEdit(
+      id,
+      name,
+      projectId,
+      content
+    ) {
+      this.environmentId = id;
+      this.environmentName = name;
+      this.environmentProjectId = projectId;
+      this.environmentContent = content;
+      console.log('environmentAddModalEdit: ', id, name, projectId, content);
+      this.showEnvironmentAddModal = true;
+    }
   })
 })

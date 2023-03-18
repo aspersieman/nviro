@@ -344,6 +344,10 @@ func EnvironmentShow(id int) Environment {
 }
 
 func EnvironmentUpdate(id int, name string, content string, project_id int) error {
+  errDelete := EnvironmentDelete(id)
+  if errDelete != nil {
+    log.Fatal(errDelete)
+  }
   statement, err := db.Prepare(`
     UPDATE environments
     SET

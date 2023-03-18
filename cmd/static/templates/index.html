@@ -21,10 +21,10 @@
     id="create-environment-modal"
     tabindex="-1"
     aria-hidden="true"
-    class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full"
+    class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-screen md:h-full max-h-full"
   >
     <div class="relative w-full h-full max-w-md md:h-auto !m-auto">
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 max-h-screen">
         <button
           @click="$store.main.showEnvironmentAddModal = false"
           type="button"
@@ -34,7 +34,8 @@
           <span class="sr-only">Close modal</span>
         </button>
         <div class="px-6 py-6 lg:px-8">
-          <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add new environment</h3>
+          <h3 x-show="$store.main.environmentId === null" class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add new environment</h3>
+          <h3 x-show="$store.main.environmentId !== null" class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Update environment</h3>
           <form
             class="space-y-6"
             x-data
@@ -97,9 +98,13 @@
               >
                 <option value="">Select project</option>
                 <template x-for="(project, index) in $store.main.projects" :key="index">
-                  <option x-bind:value="project.id" x-text="project.name"></option>
+                  <option x-bind:value="project.id" x-text="project.name" :checked="project.id == $store.main.environmentProjectId"></option>
                 </template>
               </select>
+            </div>
+            <div x-show="$store.main.environmentId !== null">
+              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="env-update-content">Environment content</label>
+              <textarea x-text="$store.main.environmentContent" id="env-update-content" rows="4" class="font-mono block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=".env file content..."></textarea>
             </div>
             <button
               @click="$store.main.createEnvironment(
@@ -109,7 +114,12 @@
               )"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              Add Environment
+              <span x-show="$store.main.environmentId === null">
+                Add Environment
+              </span>
+              <span x-show="$store.main.environmentId !== null">
+                Update Environment
+              </span>
             </button>
           </form>
         </div>
@@ -308,7 +318,6 @@
                     <tr>
                       <th scope="col" class="px-6 py-3">Id</th>
                       <th scope="col" class="px-6 py-3">Name</th>
-                      <th scope="col" class="px-6 py-3">Project Id</th>
                       <th scope="col" class="px-6 py-3">Project Name</th>
                       <th scope="col" class="px-6 py-3">Deleted At</th>
                       <th scope="col" class="px-6 py-3">&nbsp;</th>
@@ -323,7 +332,6 @@
                       <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th scope="row" x-text="environment.id" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
                         <td scope="row" x-text="environment.name" class="px-6 py-4"></td>
-                        <td scope="row" x-text="environment.project_id" class="px-6 py-4"></td>
                         <td scope="row" x-text="environment.project_name" class="px-6 py-4"></td>
                         <td scope="row" x-text="environment.deleted_at" class="px-6 py-4"></td>
                         <td scope="row" class="px-6 py-4 cursor-pointer">
@@ -351,12 +359,23 @@
                             Show
                           </button>
                           <button
-                            x-show="!environment.deleted_at"
                             @click="$store.main.deleteEnvironment(environment.id)"
                             type="button"
                             class="btn-delete"
                           >
                             Delete
+                          </button>
+                          <button
+                            @click="$store.main.environmentAddModalEdit(
+                              environment.id,
+                              environment.name,
+                              environment.project_id,
+                              environment.content
+                            );"
+                            type="button"
+                            class="btn-delete"
+                          >
+                            Update
                           </button>
                         </td>
                       </tr>

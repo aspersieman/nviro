@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=NViro
+Exec=/home/nicol/src/personal/nviro/bin/desktop-launch.sh
+Icon=/home/nicol/src/personal/nviro/cmd/static/img/logo.png
+Terminal=false
+Type=Application
+Categories=Development;
