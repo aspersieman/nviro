@@ -62,6 +62,10 @@ func environmentDelete() {
     "Environment id",
   }
   environmentId, _ := strconv.Atoi(promptGetEnvironmentDeleteInput(environmentIdPromptContent))
-  db.EnvironmentDelete(environmentId)
-  fmt.Printf("Environment %s deleted\n", environmentId)
+  err := db.EnvironmentDelete(environmentId, true)
+  if err != nil {
+    fmt.Printf("Could not delete environment %v\n", err)
+    os.Exit(1)
+  }
+  fmt.Printf("Environment %d deleted\n", environmentId)
 }

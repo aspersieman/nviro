@@ -64,6 +64,7 @@ var routes = []route{
 	newRoute("POST",    "/api/environments", apiCreateEnvironment),
 	newRoute("PUT",     "/api/environments/([0-9]+)", apiUpdateEnvironment),
 	newRoute("DELETE",  "/api/environments/([0-9]+)", apiDeleteEnvironment),
+	newRoute("DELETE",  "/api/environments/([0-9]+)?[a-zA-Z0-9_&]*", apiDeleteEnvironment),
 }
 
 type ctxKey struct{}
@@ -121,7 +122,8 @@ func home(w http.ResponseWriter, r *http.Request) {
   if err := tpl.Execute(w, data); err != nil {
     return
   }
-  environments := db.EnvironmentList(true)
+	name := ``
+  environments := db.EnvironmentList(false, name, 0, 0)
   err = tpl.ExecuteTemplate(w, "layout", environments)
   if err != nil {
     log.Printf("ERROR: Cannot parse template 'layout'. %s", err.Error())
@@ -155,8 +157,8 @@ func static(w http.ResponseWriter, r *http.Request) {
 
 func apiGetProjects(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
-  environments := db.ProjectList()
-  err := json.NewEncoder(w).Encode(environments)
+  projects := db.ProjectList()
+  err := json.NewEncoder(w).Encode(projects)
   if err != nil {
     log.Printf("ERROR: Cannot encode response. %s", err.Error())
     http.Error(w, http.StatusText(500), 500)
@@ -211,7 +213,12 @@ func apiGetEnvironments(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   deleted := r.URL.Query().Get("deleted")
   del, _ := strconv.ParseBool(deleted)
-  environments := db.EnvironmentList(del)
+  name := r.URL.Query().Get("name")
+  project_id := r.URL.Query().Get("project_id")
+  proj, _ := strconv.Atoi(project_id)
+  idParam := r.URL.Query().Get("id")
+  id, _ := strconv.Atoi(idParam)
+  environments := db.EnvironmentList(del, name, proj, id)
   err := json.NewEncoder(w).Encode(environments)
   if err != nil {
     log.Fatal(err)
@@ -237,6 +244,7 @@ func apiCreateEnvironment(w http.ResponseWriter, r *http.Request) {
 
 func apiUpdateEnvironment(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
+  id, _ := strconv.Atoi(getField(r, 0))
   reqBody, err := ioutil.ReadAll(r.Body)
   if err != nil {
     log.Fatal(err)
@@ -246,7 +254,6 @@ func apiUpdateEnvironment(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     log.Fatal(err)
   }
-  id, _ := strconv.Atoi(getField(r, 0))
   err = db.EnvironmentUpdate(id, environment.Name, environment.Content, environment.ProjectId)
   if err != nil {
     log.Fatal(err)
@@ -256,7 +263,9 @@ func apiUpdateEnvironment(w http.ResponseWriter, r *http.Request) {
 func apiDeleteEnvironment(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   id, _ := strconv.Atoi(getField(r, 0))
-  err := db.EnvironmentDelete(id)
+  forceQuery := r.URL.Query().Get("force")
+  force, _ := strconv.ParseBool(forceQuery)
+  err := db.EnvironmentDelete(id, force)
   if err != nil {
     log.Fatal(err)
   }

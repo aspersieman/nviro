@@ -6,8 +6,11 @@ document.addEventListener('alpine:init', () => {
     projectId: 'all',
     projectName: null,
     projectSearch: '',
+    projectModalId: null,
     showEnvironmentAddModal: false,
     environments: [],
+    showEnironmentHistory: null,
+    environmentHistory: [],
     environmentListDeleted: false,
     environmentSearch: '',
     environmentId: null,
@@ -28,14 +31,16 @@ document.addEventListener('alpine:init', () => {
 
 
     async getProjects() {
+      this.projects = [];
       const response = await fetch('/api/projects');
       const projects = await response.json();
       this.projects = projects;
+      this.projectList();
     },
 
-    async createProject(name) {
+    createProject(name) {
       if (name) {
-        const response = await fetch('/api/projects', {
+        fetch('/api/projects', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -43,11 +48,30 @@ document.addEventListener('alpine:init', () => {
           body: JSON.stringify({
             'name': name
           })
+        }).then(() => {
+          this.clearProjectAddModal();
+          this.showProjectAddModal = false;
+          this.getProjects();
+        })
+      }
+      return
+    },
+
+    updateProject(id, name) {
+      if (id && name) {
+        fetch('/api/projects/' + id, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            'name': name
+          })
+        }).then(() => {
+          this.clearProjectAddModal();
+          this.showProjectAddModal = false;
+          this.getProjects();
         });
-        this.clearProjectAddModal();
-        this.showProjectAddModal = false;
-        this.getProjects();
-        return response
       }
       return
     },
@@ -60,9 +84,30 @@ document.addEventListener('alpine:init', () => {
             'Content-Type': 'application/json'
           }
         }).then(() => {
-          window.location.reload();
+          this.getProjects();
         });
       }
+    },
+
+    showProjectAdd() {
+      this.clearProjectAddModal();
+      this.showProjectAddModal = true;
+    },
+
+    showProjectEdit(id, name) {
+      this.clearProjectAddModal();
+      this.projectModalId = id;
+      this.projectName = name;
+      this.showProjectAddModal = true;
+    },
+
+    clearProjectSearch() {
+      this.projectSearch = '';
+    },
+
+    clearProjectAddModal() {
+      this.projectModalId = null;
+      this.projectName = null;
     },
 
     async createEnvironment(
@@ -92,6 +137,34 @@ document.addEventListener('alpine:init', () => {
       return
     },
 
+    async updateEnvironment(
+      id,
+      name,
+      content,
+      project_id
+    ) {
+      if (name && content && project_id) {
+        const response = await fetch('/api/environments/' + id, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            'name': name,
+            'content': content,
+            'project_id': parseInt(project_id)
+          })
+        });
+        this.clearEnvironmentAddModal();
+        this.showEnvironmentAddModal = false;
+        this.getEnvironments();
+        return response
+      } else {
+        console.log('createEnvironment: stopped: ', name, content, project_id);
+      }
+      return
+    },
+
     environmentList() {
       return this.environments.filter(environment => {
         return environment.name.toLowerCase().includes(this.environmentSearch.toLowerCase()) && (
@@ -101,7 +174,8 @@ document.addEventListener('alpine:init', () => {
     },
 
     async getEnvironments() {
-      const paramDeleted = this.environmentListDeleted ? 'true' : 'false';
+      this.environments = [];
+      const paramDeleted = 'false';
       const url = (
         '/api/environments?' +
         new URLSearchParams({ deleted: paramDeleted }).toString()
@@ -109,47 +183,68 @@ document.addEventListener('alpine:init', () => {
       const response = await fetch(url);
       const environments = await response.json();
       this.environments = environments;
+      this.environmentList();
     },
 
-    deleteEnvironment(id) {
+    async getEnvironmentHistory(id, name, project_id) {
+      this.environmentHistory = [];
+      const url = (
+        '/api/environments?' +
+        new URLSearchParams({
+          id,
+          name,
+          project_id,
+          deleted: true
+        }).toString()
+      );
+      const response = await fetch(url);
+      const environments = await response.json();
+      this.environmentHistory = environments;
+      this.showEnironmentHistory = id;
+    },
+
+    async showEnironmentHistoryList(id, name, project_id) {
+      if (this.showEnironmentHistory != id) {
+        this.getEnvironmentHistory(id, name, project_id);
+      } else {
+        this.showEnironmentHistory = null;
+      }
+      
+    },
+
+    deleteEnvironment(id, force) {
+      params = force ? '?force=true' : '?force=false';
       if (id) {
-        fetch('/api/environments/' + id, {
+        fetch('/api/environments/' + id + params, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
           }
         }).then(() => {
-          window.location.reload();
+          this.getEnvironments();
+          this.environmentHistory = this.environmentHistory.filter(environment => {
+            return environment.id !== id; 
+          })
+          if (this.showEnironmentHistory.length === 0) {
+            this.showEnironmentHistory = null;
+          }
         });
       }
-    },
-
-    async downloadContent(name, content) {
-      const link = document.createElement('a');
-      link.download = name.toString();
-
-      const file = new Blob([content], { type: 'text/plain;charset=utf-8' });
-
-      link.href = URL.createObjectURL(file);
-      link.click();
-      URL.revokeObjectURL(link.href);
-    },
-
-    setActiveTab(tabName) {
-      this.activeTab = tabName;
-    },
-
-    clearProjectSearch() {
-      this.projectSearch = '';
-    },
-
-    clearProjectAddModal() {
-      this.projectName = null;
     },
 
     clearEnvironmentSearch() {
       this.environmentSearch = '';
       this.getEnvironments();
+    },
+
+    showEnvironmentAdd() {
+      this.clearEnvironmentAddModal();
+      this.showEnvironmentAddModal = true;
+    },
+
+    hideEnvironmentAdd() {
+      this.clearEnvironmentAddModal();
+      this.showEnvironmentAddModal = false;
     },
 
     clearEnvironmentAddModal() {
@@ -165,12 +260,37 @@ document.addEventListener('alpine:init', () => {
       projectId,
       content
     ) {
+      this.clearEnvironmentAddModal();
       this.environmentId = id;
       this.environmentName = name;
       this.environmentProjectId = projectId;
       this.environmentContent = content;
-      console.log('environmentAddModalEdit: ', id, name, projectId, content);
       this.showEnvironmentAddModal = true;
-    }
+    },
+
+    async downloadContent(name, content) {
+      const link = document.createElement('a');
+      link.download = name.toString();
+
+      const file = new Blob([content], { type: 'text/plain;charset=utf-8' });
+
+      link.href = URL.createObjectURL(file);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    },
+
+    setActiveTab(tabName) {
+      switch (tabName) {
+        case 'environments':
+          this.getEnvironments();
+          break;
+        case 'projects':
+          this.getProjects();
+          break;
+        default:
+          break;
+      }
+      this.activeTab = tabName;
+    },
   })
 })

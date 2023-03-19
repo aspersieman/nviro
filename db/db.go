@@ -12,6 +12,7 @@ import (
   "log"
   "os"
   "runtime"
+  "strings"
 
   _ "github.com/mattn/go-sqlite3"
 )
@@ -223,13 +224,31 @@ type Environment struct {
   DeletedAt string `json:"deleted_at"`
   CreatedAt string `json:"created_at"`
   UpdatedAt string `json:"updated_at"`
+  HistoryCount int `json:"history_count"`
 }
 
-func EnvironmentList(withDeleted bool) []Environment {
-  whereSQL := "WHERE environments.deleted_at IS NULL"
-  if withDeleted {
-    whereSQL = ""
+func EnvironmentList(withDeleted bool, name string, project_id int, id int) []Environment {
+  where := make([]string, 0)
+  var parameters []interface{}
+  whereSQL := ""
+  if !withDeleted {
+    where = append(where, "environments.deleted_at IS NULL")
   }
+  if name != "" {
+    where = append(where, "environments.name = ?")
+    parameters = append(parameters, name)
+  }
+  if project_id > 0 {
+    where = append(where, "environments.project_id = ?")
+    parameters = append(parameters, project_id)
+  }
+  if id > 0 {
+    where = append(where, "environments.id != ?")
+    parameters = append(parameters, id)
+  }
+  if len(where) > 0 {
+    whereSQL = "WHERE " + strings.Join(where, " AND ")  
+  } 
   query := fmt.Sprintf(`
     SELECT
       environments.id,
@@ -239,14 +258,27 @@ func EnvironmentList(withDeleted bool) []Environment {
       projects.name AS project_name,
       environments.deleted_at,
       environments.created_at,
-      environments.updated_at
+      environments.updated_at,
+      (
+        SELECT
+          COUNT(*)
+        FROM
+          environments history
+        WHERE
+          history.name = environments.name
+          AND history.project_id = environments.project_id
+          AND history.id != environments.id
+      ) AS history_count
     FROM
       environments
       INNER JOIN projects ON projects.id = environments.project_id
     %s
-    ORDER BY environments.id ASC
+    ORDER BY
+      environments.name ASC,
+      environments.project_id ASC,
+      environments.created_at ASC
   `, whereSQL)
-  rows, err := db.Query(query)
+  rows, err := db.Query(query, parameters...)
   if err != nil {
     log.Fatal(err.Error())
   }
@@ -262,7 +294,8 @@ func EnvironmentList(withDeleted bool) []Environment {
     var deleted_at sql.NullString
     var created_at sql.NullString 
     var updated_at sql.NullString
-    err = rows.Scan(&id, &name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at)
+    var history_count int
+    err = rows.Scan(&id, &name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at, &history_count)
     if err != nil {
       log.Fatal(err.Error())
     }
@@ -276,26 +309,60 @@ func EnvironmentList(withDeleted bool) []Environment {
       deleted_at.String,
       created_at.String,
       updated_at.String,
+      history_count,
     })
   }
 
   return environments
 }
 
-func EnvironmentDelete(id int) error {
-  statement, err := db.Prepare("UPDATE environments SET deleted_at = datetime('now') WHERE id = ?")
-  if err != nil {
-    log.Fatal(err.Error())
-    return err
-  }
-  _, err = statement.Exec(id)
-  if err != nil {
-    log.Fatalln(err.Error())
-    return err
+func EnvironmentDelete(id int, force bool) error {
+  if !force {
+    statement, err := db.Prepare(`
+      SELECT
+        environments.id,
+        environments.deleted_at
+      FROM
+        environments
+      WHERE
+        environments.id = ?
+    `)
+    if err != nil {
+      log.Fatal(err.Error())
+    }
+    defer statement.Close()
+    var environmentId int
+    var deleted_at sql.NullString
+    err = statement.QueryRow(id).Scan(&environmentId, &deleted_at)
+    if err != nil && err != sql.ErrNoRows {
+      log.Fatal(err.Error())
+    }
+    if environmentId > 0 && !deleted_at.Valid {
+      statement, err := db.Prepare("UPDATE environments SET deleted_at = datetime('now') WHERE id = ?")
+      if err != nil {
+        log.Fatal(err.Error())
+        return err
+      }
+      _, err = statement.Exec(id)
+      if err != nil {
+        log.Fatalln(err.Error())
+        return err
+      }
+    } 
+  } else {
+    statement, err := db.Prepare("DELETE FROM environments WHERE id = ?")
+    if err != nil {
+      log.Fatal(err.Error())
+      return err
+    }
+    _, err = statement.Exec(id)
+    if err != nil {
+      log.Fatalln(err.Error())
+      return err
+    }
   }
   return nil
 }
-
 
 func EnvironmentShow(id int) Environment {
   statement, err := db.Prepare(`
@@ -306,7 +373,17 @@ func EnvironmentShow(id int) Environment {
       projects.name AS project_name,
       environments.deleted_at,
       environments.created_at,
-      environments.updated_at
+      environments.updated_at,
+      (
+        SELECT
+          COUNT(*)
+        FROM
+          environments history
+        WHERE
+          history.name = environments.name
+          AND history.project_id = environments.project_id
+          AND history.id != environments.id
+      ) AS history_count
     FROM
       environments
       INNER JOIN projects ON projects.id = environments.project_id
@@ -323,11 +400,10 @@ func EnvironmentShow(id int) Environment {
   var deleted_at sql.NullString
   var created_at sql.NullString 
   var updated_at sql.NullString
-  {
-    err = statement.QueryRow(id).Scan(&name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at)
-    if err != nil {
-      log.Fatal(err.Error())
-    }
+  var history_count int
+  err = statement.QueryRow(id).Scan(&name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at, &history_count)
+  if err != nil {
+    log.Fatal(err.Error())
   }
   key := getKey()
   contentDecrypted := decrypt(key, content)
@@ -340,32 +416,57 @@ func EnvironmentShow(id int) Environment {
     deleted_at.String,
     created_at.String,
     updated_at.String,
+    history_count,
   }
 }
 
 func EnvironmentUpdate(id int, name string, content string, project_id int) error {
-  errDelete := EnvironmentDelete(id)
-  if errDelete != nil {
-    log.Fatal(errDelete)
-  }
   statement, err := db.Prepare(`
-    UPDATE environments
-    SET
-      name = ?,
-      content = ?,
-      project_id = ?,
-      updated_at = datetime('now')
-    WHERE id = ?
+    SELECT
+      environments.id
+    FROM
+      environments
+    WHERE
+      environments.name = ?
+      AND environments.project_id = ?
+      AND environments.deleted_at IS NULL
   `)
   if err != nil {
     log.Fatal(err.Error())
-    return err
   }
-  contentEncrypted := encrypt(getKey(), content)
-  _, err = statement.Exec(name, contentEncrypted, project_id, id)
-  if err != nil {
-    log.Fatalln(err.Error())
-    return err
+  defer statement.Close()
+  var environmentId int
+  err = statement.QueryRow(name, project_id).Scan(&environmentId)
+  if environmentId > 0 {
+    errDelete := EnvironmentDelete(id, false)
+    if errDelete != nil {
+      log.Fatal(errDelete)
+    }
+    err := EnvironmentInsert(name, content, project_id)
+    if err != nil {
+      log.Fatal(err.Error())
+      return err
+    }
+  } else {
+    statement, err := db.Prepare(`
+      UPDATE environments
+      SET
+        name = ?,
+        content = ?,
+        project_id = ?,
+        updated_at = datetime('now')
+      WHERE id = ?
+    `)
+    if err != nil {
+      log.Fatal(err.Error())
+      return err
+    }
+    contentEncrypted := encrypt(getKey(), content)
+    _, err = statement.Exec(name, contentEncrypted, project_id, id)
+    if err != nil {
+      log.Fatalln(err.Error())
+      return err
+    }
   }
   return nil
 }

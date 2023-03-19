@@ -28,7 +28,8 @@ func init() {
 }
 
 func environmentList(withDeleted bool) {
-  environments := db.EnvironmentList(withDeleted)
+	name := ``
+  environments := db.EnvironmentList(withDeleted, name, 0, 0)
 
   w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
   // TODO use a slice to define column headers and dividers

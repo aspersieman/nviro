@@ -15,18 +15,19 @@
   x-data
   x-init="$store.main.init()"
 >
+  <!-- EnvironmentAddModal -->
   <div
     x-data
     x-show="$store.main.showEnvironmentAddModal"
     id="create-environment-modal"
     tabindex="-1"
     aria-hidden="true"
-    class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-screen md:h-full max-h-full"
+    class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-screen md:h-full bg-gray-800/60"
   >
     <div class="relative w-full h-full max-w-md md:h-auto !m-auto">
       <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 max-h-screen">
         <button
-          @click="$store.main.showEnvironmentAddModal = false"
+          @click="$store.main.hideEnvironmentAdd()"
           type="button"
           class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
         >
@@ -104,38 +105,49 @@
             </div>
             <div x-show="$store.main.environmentId !== null">
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="env-update-content">Environment content</label>
-              <textarea x-text="$store.main.environmentContent" id="env-update-content" rows="4" class="font-mono block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=".env file content..."></textarea>
+              <textarea x-model="$store.main.environmentContent" x-text="$store.main.environmentContent" id="env-update-content" rows="4" class="font-mono block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=".env file content..."></textarea>
             </div>
             <button
+              x-show="$store.main.environmentId === null"
               @click="$store.main.createEnvironment(
-                $store.main.environmentName,
-                $store.main.environmentContent,
-                $store.main.environmentProjectId
-              )"
+                      $store.main.environmentName,
+                      $store.main.environmentContent,
+                      $store.main.environmentProjectId
+                      )"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              <span x-show="$store.main.environmentId === null">
-                Add Environment
-              </span>
-              <span x-show="$store.main.environmentId !== null">
-                Update Environment
-              </span>
+              Add Environment
+            </button>
+            <button
+              x-show="$store.main.environmentId !== null" 
+              @click="$store.main.updateEnvironment(
+                      $store.main.environmentId,
+                      $store.main.environmentName,
+                      $store.main.environmentContent,
+                      $store.main.environmentProjectId
+                      )"
+              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Update Environment
             </button>
           </form>
         </div>
       </div>
     </div>
   </div> 
+  <!-- EnvironmentAddModal -->
+
+  <!-- ProjectAddModal -->
   <div
     x-data
     x-show="$store.main.showProjectAddModal"
     id="create-project-modal"
     tabindex="-1"
     aria-hidden="true"
-    class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full"
+    class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full bg-gray-800/60"
   >
     <div class="relative w-full h-full max-w-md md:h-auto !m-auto">
-      <div class="relative bg-white shadow dark:bg-gray-700">
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 max-h-screen">
         <button
           @click="$store.main.showProjectAddModal = false"
           type="button"
@@ -164,6 +176,7 @@
               >
             </div>
             <button
+              x-show="!$store.main.projectModalId"
               @click="$store.main.createProject(
                 $store.main.projectName
               )"
@@ -171,42 +184,55 @@
             >
               Add Project
             </button>
+            <button
+              x-show="$store.main.projectModalId"
+              @click="$store.main.updateProject(
+                $store.main.projectModalId,
+                $store.main.projectName
+              )"
+              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Update Project
+            </button>
           </form>
         </div>
       </div>
     </div>
   </div> 
+  <!-- ProjectAddModal -->
+
+  <!-- Main content -->
 	<section>
-		<div class="w-100 px-6 mx-auto">
-			<div class="flex flex-wrap mx-6 justify-center">
-				<div class="relative w-100 px-6 flex-[0_0_50%] text-center mb-4">
+		<div class="w-100 mx-auto">
+			<div class="flex flex-wrap w-100">
+				<div class="relative w-100 mb-4 mx-3">
           <img src="/static/img/logo.png" class="logo !mt-1">
 					<h2 class="text-black text-xl font-bold">
             NViro
           </h2>
 				</div>
-			</div>
-			<div class="flex flex-nowrap flex-col justify-center mx-6">
         <div
-          class="flex justify-center items-center mb-4"
+          class="flex flex-auto justify-end items-center mb-4"
           x-data
         >
           <button
             type="button"
-            class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            @click="$store.main.showEnvironmentAddModal = true"
+            class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            @click="$store.main.showEnvironmentAdd()"
           >
             New Environment
           </button>
           <button
             type="button"
-            class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            @click="$store.main.showProjectAddModal = true"
+            class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            @click="$store.main.showProjectAdd()"
           >
             New Project
           </button>
         </div>
-				<div class="relative max-w-5xl m-auto border border-gray-700 rounded-t-lg">
+			</div>
+			<div class="flex flex-nowrap flex-col justify-center mx-6">
+				<div class="relative m-auto w-full max-w-5xl border border-gray-700 rounded-t-lg">
           <div class="flex border-b border-gray-200 bg-gray-700 rounded-t-lg dark:border-gray-700 m-auto mb-2">
             <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-100 dark:text-gray-100">
               <li class="mr-2" @click="$store.main.setActiveTab('environments')">
@@ -221,9 +247,9 @@
               </li>
             </ul>
           </div>
-          <div x-show="$store.main.activeTab === 'environments'" class="relative max-w-5xl flex-[0_0_100%] rounded-t-lg">
+          <div x-show="$store.main.activeTab === 'environments'" class="relative w-full flex-[0_0_100%] rounded-t-lg">
             <div
-              class="mb-1 flex space-x-4 items-stretch justify-center"
+              class="mb-1 flex space-x-4 items-stretch justify-center w-full"
               x-data
             >
               <div class="relative flex h-10" x-data>
@@ -300,20 +326,10 @@
                     <option x-bind:value="project.id" x-text="project.name"></option>
                   </template>
               </select>
-              <div class="flex items-center mb-4">
-                <input
-                  id="chk-env-list-deleted"
-                  type="checkbox"
-                  value=""
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  @click="$store.main.environmentListDeleted = !$store.main.environmentListDeleted; $store.main.getEnvironments(); $store.main.environmentList()"
-                >
-                <label for="chk-env-list-deleted" class="ml-2 text-sm font-medium text-gray-900">Show deleted</label>
-              </div>
             </div>
             <div class="flex justify-center w-full">
               <div class="relative overflow-x-auto shadow-md w-full">
-                <table style="min-width: 400px !important;" class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-environments">
+                <table class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-environments">
                   <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                       <th scope="col" class="px-6 py-3">Id</th>
@@ -334,13 +350,15 @@
                         <td scope="row" x-text="environment.name" class="px-6 py-4"></td>
                         <td scope="row" x-text="environment.project_name" class="px-6 py-4"></td>
                         <td scope="row" x-text="environment.deleted_at" class="px-6 py-4"></td>
-                        <td scope="row" class="px-6 py-4 cursor-pointer">
+                        <td scope="row" class="px-6 py-4 cursor-pointer text-end">
                           <button
                             @click="$store.main.downloadContent(environment.name, environment.content)"
                             type="button"
                             class="btn-action"
                           >
-                            Download
+                            <svg class="icon-action" xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="M5.5 16q-.625 0-1.062-.438Q4 15.125 4 14.5V13h1.5v1.5h9V13H16v1.5q0 .625-.438 1.062Q15.125 16 14.5 16Zm4.5-3L6 9l1.062-1.062 2.188 2.187V3h1.5v7.125l2.188-2.187L14 9Z"/>
+                            </svg>
                           </button>
                           <button
                             @click="showEnvFile = false"
@@ -348,7 +366,9 @@
                             type="button"
                             class="btn-action"
                           >
-                            Hide
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="m13.271 11.146-1.292-1.292q.083-.792-.479-1.364-.562-.573-1.354-.49L8.854 6.708q.271-.104.563-.156Q9.708 6.5 10 6.5q1.458 0 2.479 1.021Q13.5 8.542 13.5 10q0 .292-.052.583-.052.292-.177.563Zm2.771 2.771-1.084-1.084q.75-.583 1.365-1.281T17.354 10q-1.021-2.104-3.01-3.302Q12.354 5.5 10 5.5q-.542 0-1.062.062-.521.063-1.021.209L6.708 4.562q.792-.312 1.615-.437T10 4q2.979 0 5.448 1.615Q17.917 7.229 19 10q-.458 1.188-1.219 2.156-.76.969-1.739 1.761ZM16 18.125l-2.708-2.708q-.792.291-1.615.437Q10.854 16 10 16q-2.979 0-5.448-1.615Q2.083 12.771 1 10q.458-1.188 1.208-2.167.75-.979 1.75-1.771L1.875 3.979l1.063-1.062 14.124 14.145ZM5.021 7.146q-.729.583-1.354 1.281-.625.698-1.021 1.573 1.021 2.104 3.01 3.302Q7.646 14.5 10 14.5q.542 0 1.062-.073.521-.073 1.042-.198l-.937-.937q-.292.104-.584.156-.291.052-.583.052-1.458 0-2.479-1.021Q6.5 11.458 6.5 10q0-.292.073-.583.073-.292.135-.584ZM11 9Zm-2 2Z"/>
+                            </svg>
                           </button>
                           <button
                             @click="showEnvFile = true"
@@ -356,16 +376,21 @@
                             type="button"
                             class="btn-action"
                           >
-                            Show
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="M10 13.5q1.458 0 2.479-1.021Q13.5 11.458 13.5 10q0-1.458-1.021-2.479Q11.458 6.5 10 6.5q-1.458 0-2.479 1.021Q6.5 8.542 6.5 10q0 1.458 1.021 2.479Q8.542 13.5 10 13.5Zm0-1.5q-.833 0-1.417-.583Q8 10.833 8 10q0-.833.583-1.417Q9.167 8 10 8q.833 0 1.417.583Q12 9.167 12 10q0 .833-.583 1.417Q10.833 12 10 12Zm0 4q-2.979 0-5.417-1.635Q2.146 12.729 1 10q1.146-2.729 3.583-4.365Q7.021 4 10 4q2.979 0 5.417 1.635Q17.854 7.271 19 10q-1.146 2.729-3.583 4.365Q12.979 16 10 16Zm0-6Zm0 4.5q2.333 0 4.312-1.208 1.98-1.209 3.042-3.292-1.062-2.083-3.042-3.292Q12.333 5.5 10 5.5T5.688 6.708Q3.708 7.917 2.646 10q1.062 2.083 3.042 3.292Q7.667 14.5 10 14.5Z"/>
+                            </svg>
                           </button>
                           <button
-                            @click="$store.main.deleteEnvironment(environment.id)"
+                            @click="$store.main.deleteEnvironment(environment.id, environment.deleted_at ? true : false)"
                             type="button"
                             class="btn-delete"
                           >
-                            Delete
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="M6.5 17q-.625 0-1.062-.438Q5 16.125 5 15.5v-10H4V4h4V3h4v1h4v1.5h-1v10q0 .625-.438 1.062Q14.125 17 13.5 17Zm7-11.5h-7v10h7ZM8 14h1.5V7H8Zm2.5 0H12V7h-1.5Zm-4-8.5v10Z"/>
+                            </svg>
                           </button>
                           <button
+                            x-show="!environment.deleted_at"
                             @click="$store.main.environmentAddModalEdit(
                               environment.id,
                               environment.name,
@@ -373,14 +398,105 @@
                               environment.content
                             );"
                             type="button"
-                            class="btn-delete"
+                            class="btn-update"
                           >
-                            Update
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="M17 6v9.5q0 .625-.438 1.062Q16.125 17 15.5 17h-11q-.625 0-1.062-.438Q3 16.125 3 15.5v-11q0-.625.438-1.062Q3.875 3 4.5 3H14Zm-1.5.625L13.375 4.5H4.5v11h11ZM10 14.75q.938 0 1.594-.656.656-.656.656-1.594 0-.938-.656-1.594-.656-.656-1.594-.656-.938 0-1.594.656-.656.656-.656 1.594 0 .938.656 1.594.656.656 1.594.656ZM5.5 8.5h7v-3h-7Zm-1-1.604V15.5v-11Z"/>
+                            </svg>
+                          </button>
+                          <button
+                            x-show="environment.history_count > 0"
+                            @click="$store.main.showEnironmentHistoryList(
+                              environment.id,
+                              environment.name,
+                              environment.project_id
+                            );"
+                            type="button"
+                            class="btn-update"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="M10 17q-2.917 0-4.958-2.042Q3 12.917 3 10h1.5q0 2.271 1.615 3.885Q7.729 15.5 10 15.5t3.885-1.615Q15.5 12.271 15.5 10t-1.615-3.885Q12.271 4.5 10 4.5q-1.292 0-2.385.531-1.094.531-1.844 1.469H8V8H3V3h1.5v2.708q.958-1.25 2.385-1.979Q8.312 3 10 3q1.458 0 2.729.552 1.271.552 2.219 1.5t1.5 2.219Q17 8.542 17 10q0 1.458-.552 2.729-.552 1.271-1.5 2.219t-2.219 1.5Q11.458 17 10 17Zm2.083-4.167L9.25 10V6h1.5v3.375l2.396 2.396Z"/>
+                            </svg>
                           </button>
                         </td>
                       </tr>
                       <tr x-show.transition.in="showEnvFile" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <td colspan="6" class="px-6 py-4 font-medium text-gray-900 whitespace-pre dark:text-white"><code x-text="environment.content"></code></td>
+                        <td colspan="6" class="px-6 py-4 font-medium text-gray-900 whitespace-pre dark:text-white"><div class="max-w-5xl overflow-x-scroll"><code x-text="environment.content"></code></div></td>
+                      </tr>
+                      <tr x-show.transition.in="$store.main.showEnironmentHistory == environment.id" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <td colspan="6" class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                          <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                            <div class="text-white text-xl font-bold text-center p-0 m-0 w-full">
+                              Environment History
+                            </div>
+                            <table class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" name="tbl-environment-history">
+                              <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <tr>
+                                  <th scope="col" class="px-6 py-3">Id</th>
+                                  <th scope="col" class="px-6 py-3">Name</th>
+                                  <th scope="col" class="px-6 py-3">Deleted At</th>
+                                  <th scope="col" class="px-6 py-3">&nbsp;</th>
+                                </tr>
+                              </thead>
+                              <template
+                                x-data
+                                x-for="(environment, index) in $store.main.environmentHistory"
+                                :key="environment.id"
+                              >
+                                <tbody x-data="{ showHistoryEnvFile: false }">
+                                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    <th scope="row" x-text="environment.id" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
+                                    <td scope="row" x-text="environment.name" class="px-6 py-4"></td>
+                                    <td scope="row" x-text="environment.deleted_at" class="px-6 py-4"></td>
+                                    <td scope="row" class="px-6 py-4 cursor-pointer text-end">
+                                      <button
+                                        @click="$store.main.downloadContent(environment.name, environment.content)"
+                                        type="button"
+                                        class="btn-action"
+                                      >
+                                        <svg class="icon-action" xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                                          <path d="M5.5 16q-.625 0-1.062-.438Q4 15.125 4 14.5V13h1.5v1.5h9V13H16v1.5q0 .625-.438 1.062Q15.125 16 14.5 16Zm4.5-3L6 9l1.062-1.062 2.188 2.187V3h1.5v7.125l2.188-2.187L14 9Z"/>
+                                        </svg>
+                                      </button>
+                                      <button
+                                        @click="showHistoryEnvFile = false"
+                                        x-show="showHistoryEnvFile"
+                                        type="button"
+                                        class="btn-action"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                                          <path d="m13.271 11.146-1.292-1.292q.083-.792-.479-1.364-.562-.573-1.354-.49L8.854 6.708q.271-.104.563-.156Q9.708 6.5 10 6.5q1.458 0 2.479 1.021Q13.5 8.542 13.5 10q0 .292-.052.583-.052.292-.177.563Zm2.771 2.771-1.084-1.084q.75-.583 1.365-1.281T17.354 10q-1.021-2.104-3.01-3.302Q12.354 5.5 10 5.5q-.542 0-1.062.062-.521.063-1.021.209L6.708 4.562q.792-.312 1.615-.437T10 4q2.979 0 5.448 1.615Q17.917 7.229 19 10q-.458 1.188-1.219 2.156-.76.969-1.739 1.761ZM16 18.125l-2.708-2.708q-.792.291-1.615.437Q10.854 16 10 16q-2.979 0-5.448-1.615Q2.083 12.771 1 10q.458-1.188 1.208-2.167.75-.979 1.75-1.771L1.875 3.979l1.063-1.062 14.124 14.145ZM5.021 7.146q-.729.583-1.354 1.281-.625.698-1.021 1.573 1.021 2.104 3.01 3.302Q7.646 14.5 10 14.5q.542 0 1.062-.073.521-.073 1.042-.198l-.937-.937q-.292.104-.584.156-.291.052-.583.052-1.458 0-2.479-1.021Q6.5 11.458 6.5 10q0-.292.073-.583.073-.292.135-.584ZM11 9Zm-2 2Z"/>
+                                        </svg>
+                                      </button>
+                                      <button
+                                        @click="showHistoryEnvFile = true"
+                                        x-show="!showHistoryEnvFile"
+                                        type="button"
+                                        class="btn-action"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                                          <path d="M10 13.5q1.458 0 2.479-1.021Q13.5 11.458 13.5 10q0-1.458-1.021-2.479Q11.458 6.5 10 6.5q-1.458 0-2.479 1.021Q6.5 8.542 6.5 10q0 1.458 1.021 2.479Q8.542 13.5 10 13.5Zm0-1.5q-.833 0-1.417-.583Q8 10.833 8 10q0-.833.583-1.417Q9.167 8 10 8q.833 0 1.417.583Q12 9.167 12 10q0 .833-.583 1.417Q10.833 12 10 12Zm0 4q-2.979 0-5.417-1.635Q2.146 12.729 1 10q1.146-2.729 3.583-4.365Q7.021 4 10 4q2.979 0 5.417 1.635Q17.854 7.271 19 10q-1.146 2.729-3.583 4.365Q12.979 16 10 16Zm0-6Zm0 4.5q2.333 0 4.312-1.208 1.98-1.209 3.042-3.292-1.062-2.083-3.042-3.292Q12.333 5.5 10 5.5T5.688 6.708Q3.708 7.917 2.646 10q1.062 2.083 3.042 3.292Q7.667 14.5 10 14.5Z"/>
+                                        </svg>
+                                      </button>
+                                      <button
+                                        @click="$store.main.deleteEnvironment(environment.id, true)"
+                                        type="button"
+                                        class="btn-delete"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                                          <path d="M6.5 17q-.625 0-1.062-.438Q5 16.125 5 15.5v-10H4V4h4V3h4v1h4v1.5h-1v10q0 .625-.438 1.062Q14.125 17 13.5 17Zm7-11.5h-7v10h7ZM8 14h1.5V7H8Zm2.5 0H12V7h-1.5Zm-4-8.5v10Z"/>
+                                        </svg>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                  <tr x-show.transition.in="showHistoryEnvFile" class="bg-white dark:bg-gray-800 dark:border-gray-700">
+                                    <td colspan="6" class="px-6 py-4 font-medium text-gray-900 whitespace-pre dark:text-white"><div class="max-w-5xl overflow-x-scroll"><code x-text="environment.content"></code></div></td>
+                                  </tr>
+                                </tbody>
+                              </template>
+                            </table>
+                          </div>
+                        </td>
                       </tr>
                     </tbody>
                   </template>
@@ -388,9 +504,9 @@
               </div>
             </div>
           </div>
-          <div x-show="$store.main.activeTab === 'projects'" class="relative max-w-5xl flex-[0_0_100%] rounded-t-lg">
+          <div x-show="$store.main.activeTab === 'projects'" class="relative w-full flex-[0_0_100%] rounded-t-lg">
             <div
-              class="mb-1 flex space-x-4 items-stretch justify-center"
+              class="mb-1 flex space-x-4 items-stretch justify-center w-full"
               x-data
             >
               <div class="relative flex h-10" x-data>
@@ -440,7 +556,7 @@
             </div>
             <div class="flex justify-center w-full">
               <div class="relative overflow-x-auto shadow-md w-full">
-                <table style="min-width: 400px !important;" class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-projects">
+                <table class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-projects">
                   <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                       <th scope="col" class="px-6 py-3">Id</th>
@@ -459,14 +575,28 @@
                         <th scope="row" x-text="project.id" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
                         <td scope="row" x-text="project.name" class="px-6 py-4"></td>
                         <td scope="row" x-text="project.environment_count" class="px-6 py-4"></td>
-                        <td scope="row" class="px-6 py-4 cursor-pointer">
+                        <td scope="row" class="px-6 py-4 cursor-pointer text-end">
                           <button
                             x-show="project.environment_count === 0"
                             @click="$store.main.deleteProject(project.id)"
                             type="button"
                             class="btn-delete"
                           >
-                            Delete
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="M6.5 17q-.625 0-1.062-.438Q5 16.125 5 15.5v-10H4V4h4V3h4v1h4v1.5h-1v10q0 .625-.438 1.062Q14.125 17 13.5 17Zm7-11.5h-7v10h7ZM8 14h1.5V7H8Zm2.5 0H12V7h-1.5Zm-4-8.5v10Z"/>
+                            </svg>
+                          </button>
+                          <button
+                            @click="$store.main.showProjectEdit(
+                              project.id,
+                              project.name
+                            );"
+                            type="button"
+                            class="btn-update"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20">
+                              <path d="M17 6v9.5q0 .625-.438 1.062Q16.125 17 15.5 17h-11q-.625 0-1.062-.438Q3 16.125 3 15.5v-11q0-.625.438-1.062Q3.875 3 4.5 3H14Zm-1.5.625L13.375 4.5H4.5v11h11ZM10 14.75q.938 0 1.594-.656.656-.656.656-1.594 0-.938-.656-1.594-.656-.656-1.594-.656-.938 0-1.594.656-.656.656-.656 1.594 0 .938.656 1.594.656.656 1.594.656ZM5.5 8.5h7v-3h-7Zm-1-1.604V15.5v-11Z"/>
+                            </svg>
                           </button>
                         </td>
                       </tr>

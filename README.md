@@ -7,10 +7,10 @@
    - DONE Convert to Alpine.js
    - DONE Convert to tailwind
    - DONE List projects separately
-   - Edit environment
-   - Edit project
+   - DONE Edit environment
+   - DONE Edit project
    - Validation for forms
-   - Show/hide deleted
+   - DONE Show/hide deleted
  - API
    - DONE IN PROGRESS Create CRUD API endpoints for projects, environments
    - DONE Allow CRUD actions from UI for projects, environments
@@ -20,8 +20,9 @@
  - Upgrade deprecation warning in serve.go
  - Fix README so it looks presentable on github
  - Check for os correctly - store db appropriately
- - Create basic .env if not exists (and not already present in home dir)
- - Use .env for:
+ - Create basic config if not exists (and not already present in home dir)
+ - Use config for:
    - setting app_env
-   - Storing .env
+   - Storing config from template (if not exists)
    - Storing db
+ - Show application version on console and web ui
