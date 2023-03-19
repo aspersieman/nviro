@@ -28,3 +28,7 @@
  - Show application version on console and web ui
  - Break down all styles into classes in styles.css
  - Fix tz for environment dates
+ - Allow specifying custom:
+   - port
+   - host
+   - db (for development)
