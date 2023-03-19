@@ -1,4 +1,4 @@
-dist:
+dist: clean
 	npm install
 	npm run build
 

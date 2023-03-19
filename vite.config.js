@@ -1,5 +1,7 @@
-// vite.config.js
 export default {
+  define: {
+    'process.env': {}
+  },
   build: {
     lib: {
       entry: 'cmd/static/js/app.js',
