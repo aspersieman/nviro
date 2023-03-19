@@ -1,10 +1,14 @@
-build:
+dist:
+	npm install
+	npm run build
+
+build: dist
 	go build -o bin/nviro main.go
 
-serve:
+serve: dist
 	go run main.go serve
 
-compile:
+compile: dist
 	echo "Compiling for every OS and Platform"
 	GOOS=linux GOARCH=386 go build -o bin/nviro-linux-386 main.go
 	GOOS=linux GOARCH=amd64 go build -o bin/nviro-linux-amd64 main.go
@@ -12,10 +16,7 @@ compile:
 	GOOS=windows GOARCH=386 go build -o bin/nviro-windows-386.exe main.go
 	#GOOS=js GOARCH=amd64 go build -o bin/nviro-wasm.wasm main.go
 
-static:
-	npx tailwindcss -i ./cmd/static/css/style.css -o ./cmd/static/css/output.css
-
-static-watch:
-	npx tailwindcss -i ./cmd/static/css/style.css -o ./cmd/static/css/output.css --watch
-
 all: build
+
+clean:
+	rm -rf cmd/static/dist

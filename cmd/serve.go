@@ -34,7 +34,7 @@ var (
   pages = map[string]string{
     "/": "static/templates/index.html",
   }
-  //go:embed static/css/output.css static/js/* static/templates/index.html static/img/* static/favicon.ico static/img/logo.png
+  //go:embed static/css/output.css static/dist/* static/templates/index.html static/img/* static/favicon.ico static/img/logo.png
   res embed.FS
   debug = true
 )

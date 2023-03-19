@@ -1,5 +1,20 @@
 {
+  "name": "nviro",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite serve cmd/static/templates/",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "devDependencies": {
-    "tailwindcss": "^3.2.7"
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.7",
+    "vite": "^4.2.0"
+  },
+  "dependencies": {
+    "alpinejs": "^3.12.0"
   }
 }

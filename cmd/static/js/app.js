@@ -1,3 +1,6 @@
+import '../css/style.css';
+import Alpine from 'alpinejs';
+
 document.addEventListener('alpine:init', () => {
   Alpine.store('main', {
     activeTab: 'environments',
@@ -294,3 +297,6 @@ document.addEventListener('alpine:init', () => {
     },
   })
 })
+
+window.Alpine = Alpine;
+window.Alpine.start();
