@@ -1,6 +1,9 @@
 dist: clean
 	npm install
+	npx tailwindcss -i ./cmd/static/css/style.css -o ./cmd/static/css/output.css
 	npm run build
+	cp node_modules/flowbite/dist/flowbite.min.js cmd/static/dist/
+	cp node_modules/flowbite/dist/flowbite.min.css cmd/static/dist/
 
 build: dist
 	go build -o bin/nviro main.go

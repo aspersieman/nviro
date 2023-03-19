@@ -5,9 +5,11 @@
 	<title>NViro Server</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="/static/css/output.css">
-  <script type="module" src="/static/dist/nviro.es.js"></script>
   <link rel="shortcut icon" type="image/jpg" href="/static/favicon.ico"/>
+  <link rel="stylesheet" href="/static/dist/flowbite.min.css">
+  <link rel="stylesheet" href="/static/css/output.css">
+  <script type="module" src="/static/dist/nviro.umd.js"></script>
+  <script type="script/javascript" src="/static/dist/flowbite.min.js"></script>
 </head>
 <body
   class="bg-gray-400"
@@ -24,25 +26,25 @@
     class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-screen md:h-full bg-gray-800/60"
   >
     <div class="relative w-full h-full max-w-md md:h-auto !m-auto">
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 max-h-screen">
+      <div class="relative rounded-lg shadow bg-gray-700 max-h-screen">
         <button
           @click="$store.main.hideEnvironmentAdd()"
           type="button"
-          class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+          class="absolute top-3 right-2.5 text-gray-400 bg-transparent rounded-lg text-sm p-1.5 ml-auto inline-flex items-center hover:bg-gray-800 hover:text-white"
         >
           <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
           <span class="sr-only">Close modal</span>
         </button>
         <div class="px-6 py-6 lg:px-8">
-          <h3 x-show="$store.main.environmentId === null" class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add new environment</h3>
-          <h3 x-show="$store.main.environmentId !== null" class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Update environment</h3>
+          <h3 x-show="$store.main.environmentId === null" class="mb-4 text-xl font-medium text-white">Add new environment</h3>
+          <h3 x-show="$store.main.environmentId !== null" class="mb-4 text-xl font-medium text-white">Update environment</h3>
           <form
             class="space-y-6"
             x-data
             onsubmit="event.preventDefault();"
           >
             <div>
-              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="fil-environment-add-content">Upload file</label>
+              <label class="block mb-2 text-sm font-medium text-white" for="fil-environment-add-content">Upload file</label>
               <input
                 @change="(e) => {
                   const fr = new FileReader();
@@ -52,49 +54,31 @@
                   }
                   fr.readAsText(e.target.files[0]);
                 }"
-                class="block w-full h-10 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                class="block w-full h-10 text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
                 id="fil-environment-add-content"
                 name="fil-environment-add-content"
                 type="file"
               >
             </div>
             <div>
-              <label for="txt-environment-add-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+              <label for="txt-environment-add-name" class="block mb-2 text-sm font-medium text-white">Name</label>
               <input
                 x-model="$store.main.environmentName"
                 type="text"
                 name="txt-environment-add-name"
                 id="txt-environment-add-name"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                class="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
                 placeholder=".env.example"
                 required
               >
             </div>
             <div>
-              <label for="sel-environment-add-project" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Project</label>
+              <label for="sel-environment-add-project" class="block mb-2 text-sm font-medium text-white">Project</label>
               <select
                 name="sel-environment-add-project"
                 id="sel-environment-add-project"
                 x-model="$store.main.environmentProjectId"
-                class="
-                  flex
-                  bg-gray-50
-                  border
-                  border-gray-300
-                  text-gray-900
-                  text-sm
-                  rounded-lg
-                  focus:ring-blue-500
-                  focus:border-blue-500
-                  p-2.5
-                  h-10
-                  dark:bg-gray-700
-                  dark:border-gray-600
-                  dark:placeholder-gray-400
-                  dark:text-white
-                  dark:focus:ring-blue-500
-                  dark:focus:border-blue-500
-               "
+                class="sel-default"
               >
                 <option value="">Select project</option>
                 <template x-for="(project, index) in $store.main.projects" :key="index">
@@ -103,8 +87,8 @@
               </select>
             </div>
             <div x-show="$store.main.environmentId !== null">
-              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="env-update-content">Environment content</label>
-              <textarea x-model="$store.main.environmentContent" x-text="$store.main.environmentContent" id="env-update-content" rows="4" class="font-mono block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=".env file content..."></textarea>
+              <label class="block mb-2 text-sm font-medium text-white" for="env-update-content">Environment content</label>
+              <textarea x-model="$store.main.environmentContent" x-text="$store.main.environmentContent" id="env-update-content" rows="4" class="font-mono block p-2.5 w-full text-sm rounded-lg border bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder=".env file content..."></textarea>
             </div>
             <button
               x-show="$store.main.environmentId === null"
@@ -113,7 +97,7 @@
                       $store.main.environmentContent,
                       $store.main.environmentProjectId
                       )"
-              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              class="w-full text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
             >
               Add Environment
             </button>
@@ -125,7 +109,7 @@
                       $store.main.environmentContent,
                       $store.main.environmentProjectId
                       )"
-              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              class="w-full text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
             >
               Update Environment
             </button>
@@ -146,30 +130,30 @@
     class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] md:h-full bg-gray-800/60"
   >
     <div class="relative w-full h-full max-w-md md:h-auto !m-auto">
-      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 max-h-screen">
+      <div class="relative rounded-lg shadow bg-gray-700 max-h-screen">
         <button
           @click="$store.main.showProjectAddModal = false"
           type="button"
-          class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+          class="absolute top-3 right-2.5 text-gray-400 bg-transparent rounded-lg text-sm p-1.5 ml-auto inline-flex items-center hover:bg-gray-800 hover:text-white"
         >
           <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
           <span class="sr-only">Close modal</span>
         </button>
         <div class="px-6 py-6 lg:px-8">
-          <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add new project</h3>
+          <h3 class="mb-4 text-xl font-medium text-white">Add new project</h3>
           <form
             class="space-y-6"
             x-data
             onsubmit="event.preventDefault();"
           >
             <div>
-              <label for="txt-project-add-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+              <label for="txt-project-add-name" class="block mb-2 text-sm font-medium text-white">Name</label>
               <input
                 x-model="$store.main.projectName"
                 type="text"
                 name="txt-project-add-name"
                 id="txt-project-add-name"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                class="border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white"
                 placeholder="Project name..."
                 required
               >
@@ -179,7 +163,7 @@
               @click="$store.main.createProject(
                 $store.main.projectName
               )"
-              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              class="w-full text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
             >
               Add Project
             </button>
@@ -189,7 +173,7 @@
                 $store.main.projectModalId,
                 $store.main.projectName
               )"
-              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              class="w-full text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-600 hover:bg-blue-700 focus:ring-blue-800"
             >
               Update Project
             </button>
@@ -216,14 +200,14 @@
         >
           <button
             type="button"
-            class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            class="btn-action-main"
             @click="$store.main.showEnvironmentAdd()"
           >
             New Environment
           </button>
           <button
             type="button"
-            class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            class="btn-action-main"
             @click="$store.main.showProjectAdd()"
           >
             New Project
@@ -232,8 +216,8 @@
 			</div>
 			<div class="flex flex-nowrap flex-col justify-center mx-6">
 				<div class="relative m-auto w-full max-w-5xl border border-gray-700 rounded-t-lg">
-          <div class="flex border-b border-gray-200 bg-gray-700 rounded-t-lg dark:border-gray-700 m-auto mb-2">
-            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-100 dark:text-gray-100">
+          <div class="flex border-b bg-gray-700 rounded-t-lg border-gray-700 m-auto mb-2">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-100">
               <li class="mr-2" @click="$store.main.setActiveTab('environments')">
                 <a href="#" class="group" :class="{ 'tab-active active': $store.main.activeTab === 'environments', 'tab-inactive': $store.main.activeTab !== 'environments'}" aria-current="page">
                   <svg aria-hidden="true" :class="{ 'tab-icon-active': $store.main.activeTab === 'environments', 'tab-icon-inactive': $store.main.activeTab !== 'environments'}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>Environments
@@ -253,7 +237,7 @@
             >
               <div class="relative flex h-10" x-data>
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+                  <svg aria-hidden="true" class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
                 </div>
                 <input
                   x-data
@@ -261,27 +245,7 @@
                   x-model="$store.main.environmentSearch"
                   @keyup="$store.main.environmentList()" 
                   type="text"
-                  class="
-                    bg-gray-50
-                    border
-                    border-gray-300
-                    text-gray-900
-                    text-sm
-                    rounded-lg
-                    focus:ring-blue-500
-                    focus:border-blue-500
-                    block
-                    w-full
-                    h-10
-                    pl-10
-                    p-2.5
-                    dark:bg-gray-700
-                    dark:border-gray-600
-                    dark:placeholder-gray-400
-                    dark:text-white
-                    dark:focus:ring-blue-500
-                    dark:focus:border-blue-500
-                  "
+                  class="txt-search"
 
                   placeholder="Search.." 
                 >
@@ -290,7 +254,7 @@
                   type="button"
                   class="absolute inset-y-0 right-0 flex items-center pr-3"
                 >
-                  <svg aria-hidden="true" class="w-4 h-4 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <svg aria-hidden="true" class="w-4 h-4 text-gray-400 hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                   </svg>
                 </button>
@@ -300,25 +264,7 @@
                 id="sel-projects"
                 x-model="$store.main.projectId"
                 @change="$store.main.environmentList()"
-                class="
-                  flex
-                  bg-gray-50
-                  border
-                  border-gray-300
-                  text-gray-900
-                  text-sm
-                  rounded-lg
-                  focus:ring-blue-500
-                  focus:border-blue-500
-                  p-2.5
-                  h-10
-                  dark:bg-gray-700
-                  dark:border-gray-600
-                  dark:placeholder-gray-400
-                  dark:text-white
-                  dark:focus:ring-blue-500
-                  dark:focus:border-blue-500
-               "
+                class="sel-default"
               >
                   <option value="all">All</option>
                   <template x-for="(project, index) in $store.main.projects" :key="index">
@@ -328,13 +274,13 @@
             </div>
             <div class="flex justify-center w-full">
               <div class="relative overflow-x-auto shadow-md w-full">
-                <table class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-environments">
-                  <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table class="tbl-default" id="tbl-environments">
+                  <thead class="text-xs uppercase bg-gray-700 text-gray-400">
                     <tr>
                       <th scope="col" class="px-6 py-3">Id</th>
                       <th scope="col" class="px-6 py-3">Name</th>
                       <th scope="col" class="px-6 py-3">Project Name</th>
-                      <th scope="col" class="px-6 py-3">Deleted At</th>
+                      <th scope="col" class="px-6 py-3">Archived At</th>
                       <th scope="col" class="px-6 py-3">&nbsp;</th>
                     </tr>
                   </thead>
@@ -344,11 +290,11 @@
                     :key="environment.id"
                   >
                     <tbody x-data="{ showEnvFile: false }">
-                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <th scope="row" x-text="environment.id" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
+                      <tr class="border-b bg-gray-800 border-gray-700">
+                        <th scope="row" x-text="environment.id" class="px-6 py-4 font-medium whitespace-nowrap text-white"></th>
                         <td scope="row" x-text="environment.name" class="px-6 py-4"></td>
                         <td scope="row" x-text="environment.project_name" class="px-6 py-4"></td>
-                        <td scope="row" x-text="environment.deleted_at" class="px-6 py-4"></td>
+                        <td scope="row" x-text="$store.main.formatDate(environment.deleted_at)" class="px-6 py-4"></td>
                         <td scope="row" class="px-6 py-4 cursor-pointer text-end">
                           <button
                             @click="$store.main.downloadContent(environment.name, environment.content)"
@@ -405,7 +351,7 @@
                           </button>
                           <button
                             x-show="environment.history_count > 0"
-                            @click="$store.main.showEnironmentHistoryList(
+                            @click="$store.main.showEnvironmentHistoryList(
                               environment.id,
                               environment.name,
                               environment.project_id
@@ -419,21 +365,21 @@
                           </button>
                         </td>
                       </tr>
-                      <tr x-show.transition.in="showEnvFile" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <td colspan="6" class="px-6 py-4 font-medium text-gray-900 whitespace-pre dark:text-white"><div class="max-w-5xl overflow-x-scroll"><code x-text="environment.content"></code></div></td>
+                      <tr x-show.transition.in="showEnvFile" class="border-b bg-gray-800 border-gray-700">
+                        <td colspan="6" class="px-6 py-4 font-medium whitespace-pre text-white"><div class="max-w-5xl overflow-x-scroll"><code x-text="environment.content"></code></div></td>
                       </tr>
-                      <tr x-show.transition.in="$store.main.showEnironmentHistory == environment.id" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <td colspan="6" class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                          <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <tr x-show.transition.in="$store.main.showEnvironmentHistory == environment.id" class="border-b bg-gray-800 border-gray-700">
+                        <td colspan="6" class="px-6 py-4 font-medium text-white">
+                          <div class="border border-gray-700 rounded-lg p-4">
                             <div class="text-white text-xl font-bold text-center p-0 m-0 w-full">
                               Environment History
                             </div>
-                            <table class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" name="tbl-environment-history">
-                              <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <table class="tbl-default" name="tbl-environment-history">
+                              <thead class="text-xs uppercase bg-gray-700 text-gray-400">
                                 <tr>
                                   <th scope="col" class="px-6 py-3">Id</th>
                                   <th scope="col" class="px-6 py-3">Name</th>
-                                  <th scope="col" class="px-6 py-3">Deleted At</th>
+                                  <th scope="col" class="px-6 py-3">Archived At</th>
                                   <th scope="col" class="px-6 py-3">&nbsp;</th>
                                 </tr>
                               </thead>
@@ -443,10 +389,10 @@
                                 :key="environment.id"
                               >
                                 <tbody x-data="{ showHistoryEnvFile: false }">
-                                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                    <th scope="row" x-text="environment.id" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
+                                  <tr class="border-b bg-gray-800 border-gray-700">
+                                    <th scope="row" x-text="environment.id" class="px-6 py-4 font-medium whitespace-nowrap text-white"></th>
                                     <td scope="row" x-text="environment.name" class="px-6 py-4"></td>
-                                    <td scope="row" x-text="environment.deleted_at" class="px-6 py-4"></td>
+                                    <td scope="row" x-text="$store.main.formatDate(environment.deleted_at)" class="px-6 py-4"></td>
                                     <td scope="row" class="px-6 py-4 cursor-pointer text-end">
                                       <button
                                         @click="$store.main.downloadContent(environment.name, environment.content)"
@@ -488,8 +434,8 @@
                                       </button>
                                     </td>
                                   </tr>
-                                  <tr x-show.transition.in="showHistoryEnvFile" class="bg-white dark:bg-gray-800 dark:border-gray-700">
-                                    <td colspan="6" class="px-6 py-4 font-medium text-gray-900 whitespace-pre dark:text-white"><div class="max-w-5xl overflow-x-scroll"><code x-text="environment.content"></code></div></td>
+                                  <tr x-show.transition.in="showHistoryEnvFile" class="bg-gray-800 border-gray-700">
+                                    <td colspan="6" class="px-6 py-4 font-medium text-gray-900 whitespace-pre text-white"><div class="max-w-5xl overflow-x-scroll"><code x-text="environment.content"></code></div></td>
                                   </tr>
                                 </tbody>
                               </template>
@@ -510,7 +456,7 @@
             >
               <div class="relative flex h-10" x-data>
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+                  <svg aria-hidden="true" class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
                 </div>
                 <input
                   x-data
@@ -518,27 +464,7 @@
                   x-model="$store.main.projectSearch"
                   @keyup="$store.main.projectList()" 
                   type="text"
-                  class="
-                    bg-gray-50
-                    border
-                    border-gray-300
-                    text-gray-900
-                    text-sm
-                    rounded-lg
-                    focus:ring-blue-500
-                    focus:border-blue-500
-                    block
-                    w-full
-                    h-10
-                    pl-10
-                    p-2.5
-                    dark:bg-gray-700
-                    dark:border-gray-600
-                    dark:placeholder-gray-400
-                    dark:text-white
-                    dark:focus:ring-blue-500
-                    dark:focus:border-blue-500
-                  "
+                  class="txt-search"
 
                   placeholder="Search.." 
                 >
@@ -547,7 +473,7 @@
                   type="button"
                   class="absolute inset-y-0 right-0 flex items-center pr-3"
                 >
-                  <svg aria-hidden="true" class="w-4 h-4 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <svg aria-hidden="true" class="w-4 h-4 text-gray-400 hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                   </svg>
                 </button>
@@ -555,8 +481,8 @@
             </div>
             <div class="flex justify-center w-full">
               <div class="relative overflow-x-auto shadow-md w-full">
-                <table class="mx-auto w-full table-auto text-sm text-left text-gray-500 dark:text-gray-400" id="tbl-projects">
-                  <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table class="tbl-default" id="tbl-projects">
+                  <thead class="text-xs uppercase bg-gray-700 text-gray-400">
                     <tr>
                       <th scope="col" class="px-6 py-3">Id</th>
                       <th scope="col" class="px-6 py-3">Name</th>
@@ -570,8 +496,8 @@
                     :key="project.id"
                   >
                     <tbody x-data="{ showEnvFile: false }">
-                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <th scope="row" x-text="project.id" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"></th>
+                      <tr class="border-b bg-gray-800 border-gray-700">
+                        <th scope="row" x-text="project.id" class="px-6 py-4 font-medium whitespace-nowrap text-white"></th>
                         <td scope="row" x-text="project.name" class="px-6 py-4"></td>
                         <td scope="row" x-text="project.environment_count" class="px-6 py-4"></td>
                         <td scope="row" class="px-6 py-4 cursor-pointer text-end">

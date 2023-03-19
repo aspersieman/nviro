@@ -1,4 +1,5 @@
-import '../css/style.css';
+import 'flowbite';
+
 import Alpine from 'alpinejs';
 
 document.addEventListener('alpine:init', () => {
@@ -12,7 +13,7 @@ document.addEventListener('alpine:init', () => {
     projectModalId: null,
     showEnvironmentAddModal: false,
     environments: [],
-    showEnironmentHistory: null,
+    showEnvironmentHistory: null,
     environmentHistory: [],
     environmentListDeleted: false,
     environmentSearch: '',
@@ -203,20 +204,20 @@ document.addEventListener('alpine:init', () => {
       const response = await fetch(url);
       const environments = await response.json();
       this.environmentHistory = environments;
-      this.showEnironmentHistory = id;
+      this.showEnvironmentHistory = id;
     },
 
-    async showEnironmentHistoryList(id, name, project_id) {
-      if (this.showEnironmentHistory != id) {
+    async showEnvironmentHistoryList(id, name, project_id) {
+      if (this.showEnvironmentHistory != id) {
         this.getEnvironmentHistory(id, name, project_id);
       } else {
-        this.showEnironmentHistory = null;
+        this.showEnvironmentHistory = null;
       }
       
     },
 
     deleteEnvironment(id, force) {
-      params = force ? '?force=true' : '?force=false';
+      const params = force ? '?force=true' : '?force=false';
       if (id) {
         fetch('/api/environments/' + id + params, {
           method: 'DELETE',
@@ -228,8 +229,8 @@ document.addEventListener('alpine:init', () => {
           this.environmentHistory = this.environmentHistory.filter(environment => {
             return environment.id !== id; 
           })
-          if (this.showEnironmentHistory.length === 0) {
-            this.showEnironmentHistory = null;
+          if (this.showEnvironmentHistory && this.showEnvironmentHistory.length === 0) {
+            this.showEnvironmentHistory = null;
           }
         });
       }
@@ -295,6 +296,12 @@ document.addEventListener('alpine:init', () => {
       }
       this.activeTab = tabName;
     },
+
+    formatDate(d) {
+      if (!d) return '';
+      const date = new Date(d);
+      return date.toLocaleString();
+    }
   })
 })
 
