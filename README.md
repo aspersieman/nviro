@@ -25,7 +25,7 @@
    - setting app_env
    - Storing config from template (if not exists)
    - Storing db
- - Show application version on console and web ui
+ - DONE Show application version on console and web ui
  - Break down all styles into classes in styles.css
  - Fix tz for environment dates
  - Allow specifying custom:
