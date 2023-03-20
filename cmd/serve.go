@@ -34,7 +34,7 @@ var (
   pages = map[string]string{
     "/": "static/templates/index.html",
   }
-  //go:embed static/css/output.css static/dist/* static/templates/index.html static/img/* static/favicon.ico static/img/logo.png
+  //go:embed static/css/output.css static/dist/* static/templates/index.html static/img/* static/favicon.ico static/img/logo.png static/VERSION
   res embed.FS
   debug = true
 )
@@ -116,15 +116,20 @@ func home(w http.ResponseWriter, r *http.Request) {
   }
   w.Header().Set("Content-Type", "text/html")
   w.WriteHeader(http.StatusOK)
+  versionFile, err := res.ReadFile("static/VERSION")
+  if err != nil {
+    log.Printf("ERROR: Failed to read version file: %s", err)
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+  version := string(versionFile)
   data := map[string]interface{}{
-    "userAgent": r.UserAgent(),
+    "version": version,
   }
   if err := tpl.Execute(w, data); err != nil {
     return
   }
-	name := ``
-  environments := db.EnvironmentList(false, name, 0, 0)
-  err = tpl.ExecuteTemplate(w, "layout", environments)
+  err = tpl.ExecuteTemplate(w, "layout", version)
   if err != nil {
     log.Printf("ERROR: Cannot parse template 'layout'. %s", err.Error())
     http.Error(w, http.StatusText(500), 500)

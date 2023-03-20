@@ -188,30 +188,48 @@
 	<section>
 		<div class="w-100 mx-auto">
 			<div class="flex flex-wrap w-100">
-				<div class="relative w-100 mb-4 mx-3">
-          <img src="/static/img/logo.png" class="logo !mt-1">
-					<h2 class="text-black text-xl font-bold">
-            NViro
-          </h2>
-				</div>
+        <div class="flex items-center m-1">
+          <div x-data="{ isMenuOpen: false }" class="relative mr-56">
+            <div x-show="isMenuOpen" x-transition:enter="transition ease-in-out duration-300" x-transition:enter-start="opacity-0 transform scale-x-0 -translate-x-1/2" x-transition:enter-end="opacity-100 transform scale-x-100 translate-x-0" x-transition:leave="transition ease-in-out duration-300" x-transition:leave-start="opacity-100 transform scale-x-100 translate-x-0" x-transition:leave-end="opacity-0 transform scale-x-0 -translate-x-1/2" class="absolute inset-y-0 left-1/2 h-20 flex items-center pl-12 pr-3 space-x-2 bg-gray-800 rounded-tr-full rounded-br-full">
+              <button
+                @click="$store.main.showEnvironmentAdd()"
+                data-tooltip-target="tooltip-environment-add"
+                data-tooltip-placement="bottom"
+                class="h-16 w-16 inline-flex items-center justify-center text-blue-600 hover:bg-white hover:bg-opacity-5 rounded-full"
+              >
+                <svg fill="none" viewBox="0 0 20 20" stroke="currentColor" class="inline-flex items-center justify-center h-12 w-12" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </button>
+              <div id="tooltip-environment-add" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip">
+                New Environment
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+              <button
+                @click="$store.main.showProjectAdd()"
+                data-tooltip-target="tooltip-project-add"
+                data-tooltip-placement="bottom"
+                class="h-16 w-16 inline-flex items-center justify-center text-blue-600 hover:bg-white hover:bg-opacity-5 rounded-full"
+              >
+                <svg fill="none" viewBox="0 0 20 20" stroke="currentColor" class="inline-flex items-center justify-center h-12 w-12" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+                </svg>
+              </button>
+              <div id="tooltip-project-add" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip">
+                New Project
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
+            <button class="relative h-20 w-20 inline-flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-tl-full rounded-bl-full focus:outline-none transition-all duration-300" :class="isMenuOpen ? 'bg-blue-600 hover:bg-blue-600' : 'rounded-tr-full rounded-br-full'" @click="isMenuOpen = !isMenuOpen">
+              <img src="/static/img/logo-light.png" class="logo h-12 w-12 text-white">
+            </button>
+          </div>
+        </div>
         <div
           class="flex flex-auto justify-end items-center mb-4"
           x-data
         >
-          <button
-            type="button"
-            class="btn-action-main"
-            @click="$store.main.showEnvironmentAdd()"
-          >
-            New Environment
-          </button>
-          <button
-            type="button"
-            class="btn-action-main"
-            @click="$store.main.showProjectAdd()"
-          >
-            New Project
-          </button>
+          <small class="px-1 top-0 fixed">Version: {{ . }}</small>
         </div>
 			</div>
 			<div class="flex flex-nowrap flex-col justify-center mx-6">
@@ -368,9 +386,14 @@
                       <tr x-show.transition.in="showEnvFile" class="border-b bg-gray-800 border-gray-700">
                         <td colspan="6" class="px-6 py-4 font-medium whitespace-pre text-white"><div class="max-w-5xl overflow-x-scroll"><code x-text="environment.content"></code></div></td>
                       </tr>
-                      <tr x-show.transition.in="$store.main.showEnvironmentHistory == environment.id" class="border-b bg-gray-800 border-gray-700">
-                        <td colspan="6" class="px-6 py-4 font-medium text-white">
-                          <div class="border border-gray-700 rounded-lg p-4">
+                      <tr
+                        :class="[$store.main.showEnvironmentHistory == environment.id ? 'active border-b border-gray-700' : '', environment.history_count == 0 ? 'hidden' : '']"
+                        class="bg-gray-800"
+                      >
+                        <td colspan="6" class="font-medium text-white">
+                          <div
+                            class="rounded-lg"
+                          >
                             <div class="text-white text-xl font-bold text-center p-0 m-0 w-full">
                               Environment History
                             </div>
