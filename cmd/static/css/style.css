@@ -7,12 +7,20 @@
   margin: auto;
 }
 @keyframes rotate {
-  0% { transform: rotate(0deg) scale(1.0); }
-  100% { transform: rotate(360deg) scale(1.2); }
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.2);
+  }
 }
 @keyframes rori {
-  0% { transform: rotate(360deg) scale(1.2); }
-  100% { transform: rotate(0deg) scale(1.0); }
+  0% {
+    transform: rotate(360deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
 }
 img.logo:hover {
   animation-name: rotate;
@@ -29,8 +37,6 @@ img.logo {
   vertical-align: middle;
 }
 tr td div {
-  max-height: 0 !important;
-  padding: 0 1rem !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
   transition: max-height 0.3s, padding 0.3s !important;
@@ -51,7 +57,7 @@ tr.active td div {
     @apply focus:outline-none text-white focus:ring-4 font-medium rounded-lg text-sm px-2.5 py-1 mr-1 mb-1 bg-red-600 hover:bg-red-700 focus:ring-red-900;
   }
   .btn-update {
-    @apply text-white focus:ring-4 font-medium rounded-lg text-sm px-2.5 py-1 mr-1 mb-1 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-blue-800
+    @apply text-white focus:ring-4 font-medium rounded-lg text-sm px-2.5 py-1 mr-1 mb-1 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-blue-800;
   }
   .btn-action > svg > path,
   .btn-delete > svg > path,

@@ -1469,6 +1469,10 @@ input:checked + .toggle-bg {
   height: 100%;
 }
 
+.max-h-full {
+  max-height: 100%;
+}
+
 .max-h-screen {
   max-height: 100vh;
 }
@@ -1503,6 +1507,10 @@ input:checked + .toggle-bg {
 
 .w-full {
   width: 100%;
+}
+
+.max-w-2xl {
+  max-width: 42rem;
 }
 
 .max-w-5xl {
@@ -1694,6 +1702,10 @@ input:checked + .toggle-bg {
 
 .whitespace-pre {
   white-space: pre;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
 }
 
 .rounded-full {
@@ -2130,7 +2142,7 @@ input:checked + .toggle-bg {
 
 @keyframes rotate {
   0% {
-    transform: rotate(0deg) scale(1.0);
+    transform: rotate(0deg) scale(1);
   }
 
   100% {
@@ -2144,7 +2156,7 @@ input:checked + .toggle-bg {
   }
 
   100% {
-    transform: rotate(0deg) scale(1.0);
+    transform: rotate(0deg) scale(1);
   }
 }
 
@@ -2165,8 +2177,6 @@ img.logo {
 }
 
 tr td div {
-  max-height: 0 !important;
-  padding: 0 1rem !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
   transition: max-height 0.3s, padding 0.3s !important;
