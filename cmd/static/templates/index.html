@@ -338,12 +338,14 @@
             <small class="px-1 top-0 fixed">Version: {{ . }}</small>
           </div>
         </div>
-        <div class="flex flex-nowrap flex-col justify-center mx-6">
+        <div
+          class="flex flex-nowrap flex-col justify-center mx-6 mb-5 rounded-lg"
+        >
           <div
-            class="relative m-auto w-full max-w-5xl border border-gray-700 rounded-t-lg"
+            class="relative m-auto w-full max-w-5xl border border-gray-700 rounded-lg"
           >
             <div
-              class="flex border-b bg-gray-700 rounded-t-lg border-gray-700 m-auto mb-2"
+              class="flex border-b bg-gray-700 rounded-t-lg border-gray-700 m-auto"
             >
               <ul
                 class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-100"
@@ -391,68 +393,121 @@
                   </a>
                 </li>
               </ul>
-            </div>
-            <div
-              x-show="$store.main.activeTab === 'environments'"
-              class="relative w-full flex-[0_0_100%] rounded-t-lg"
-            >
-              <div
-                class="mb-1 flex space-x-4 items-stretch justify-center w-full"
-                x-data
-              >
-                <div class="relative flex h-10" x-data>
-                  <div
-                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="w-5 h-5 text-gray-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
+              <div class="flex grow">&nbsp;</div>
+              <div class="mb-1 flex self-end" x-data>
+                <div
+                  x-show="$store.main.activeTab === 'projects'"
+                  class="mb-1 flex space-x-4 items-stretch justify-center w-full"
+                  x-data
+                >
+                  <div class="relative flex h-10 m-1" x-data>
+                    <div
+                      class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
                     >
-                      <path
-                        fill-rule="evenodd"
-                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
+                      <svg
+                        aria-hidden="true"
+                        class="w-5 h-5 text-gray-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                    </div>
+                    <input
+                      x-data
+                      id="txt-project-search"
+                      x-model="$store.main.projectSearch"
+                      @keyup="$store.main.projectList()"
+                      type="text"
+                      class="txt-search"
+                      placeholder="Search.."
+                    />
+                    <button
+                      @click="$store.main.clearProjectSearch()"
+                      type="button"
+                      class="absolute inset-y-0 right-0 flex items-center pr-3"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="w-4 h-4 text-gray-400 hover:text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                    </button>
                   </div>
-                  <input
-                    x-data
-                    id="txt-environment-search"
-                    x-model="$store.main.environmentSearch"
-                    @keyup="$store.main.environmentList()"
-                    type="text"
-                    class="txt-search"
-                    placeholder="Search.."
-                  />
-                  <button
-                    @click="$store.main.clearEnvironmentSearch()"
-                    type="button"
-                    class="absolute inset-y-0 right-0 flex items-center pr-3"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="w-4 h-4 text-gray-400 hover:text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
+                </div>
+                <div
+                  x-show="$store.main.activeTab === 'environments'"
+                  class="mb-1 flex space-x-4 items-stretch justify-center w-full"
+                  x-data
+                >
+                  <div class="relative flex h-10 m-1" x-data>
+                    <div
+                      class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
                     >
-                      <path
-                        fill-rule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                  </button>
+                      <svg
+                        aria-hidden="true"
+                        class="w-5 h-5 text-gray-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                    </div>
+                    <input
+                      x-data
+                      id="txt-environment-search"
+                      x-model="$store.main.environmentSearch"
+                      @keyup="$store.main.environmentList()"
+                      type="text"
+                      class="txt-search"
+                      placeholder="Search.."
+                    />
+                    <button
+                      @click="$store.main.clearEnvironmentSearch()"
+                      type="button"
+                      class="absolute inset-y-0 right-0 flex items-center pr-3"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="w-4 h-4 text-gray-400 hover:text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <select
+                  x-show="$store.main.activeTab === 'environments'"
                   name="projects"
                   id="sel-projects"
                   x-model="$store.main.projectId"
                   @change="$store.main.environmentList()"
-                  class="sel-default"
+                  class="sel-default m-1"
                 >
                   <option value="all">All</option>
                   <template
@@ -466,9 +521,14 @@
                   </template>
                 </select>
               </div>
+            </div>
+            <div
+              x-show="$store.main.activeTab === 'environments'"
+              class="relative w-full flex-[0_0_100%] rounded-t-lg"
+            >
               <div class="flex justify-center w-full">
                 <div class="relative overflow-x-auto shadow-md w-full">
-                  <table class="tbl-default" id="tbl-environments">
+                  <table class="tbl-default rounded-b-lg" id="tbl-environments">
                     <thead class="text-xs uppercase bg-gray-700 text-gray-400">
                       <tr>
                         <th scope="col" class="px-6 py-3">Id</th>
@@ -641,7 +701,7 @@
                                 Environment History
                               </div>
                               <table
-                                class="tbl-default"
+                                class="tbl-default rounded-b-lg"
                                 name="tbl-environment-history"
                               >
                                 <thead
@@ -784,58 +844,6 @@
               x-show="$store.main.activeTab === 'projects'"
               class="relative w-full flex-[0_0_100%] rounded-t-lg"
             >
-              <div
-                class="mb-1 flex space-x-4 items-stretch justify-center w-full"
-                x-data
-              >
-                <div class="relative flex h-10" x-data>
-                  <div
-                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="w-5 h-5 text-gray-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                  </div>
-                  <input
-                    x-data
-                    id="txt-project-search"
-                    x-model="$store.main.projectSearch"
-                    @keyup="$store.main.projectList()"
-                    type="text"
-                    class="txt-search"
-                    placeholder="Search.."
-                  />
-                  <button
-                    @click="$store.main.clearProjectSearch()"
-                    type="button"
-                    class="absolute inset-y-0 right-0 flex items-center pr-3"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="w-4 h-4 text-gray-400 hover:text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clip-rule="evenodd"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
               <div class="flex justify-center w-full">
                 <div class="relative overflow-x-auto shadow-md w-full">
                   <table class="tbl-default" id="tbl-projects">
