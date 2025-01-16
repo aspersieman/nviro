@@ -1,15 +1,16 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package main
 
 import (
-  "nviro/cmd"
-  "nviro/db"
+	"fmt"
+	"nviro/cmd"
+	"nviro/db"
 )
 
 func main() {
-  db.OpenDatabase()
+	fmt.Printf("STARTING APP")
+	db.OpenDatabase()
 	cmd.Execute()
 }

@@ -4,64 +4,65 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
-  "database/sql"
-  "fmt"
-  "io"
-  "log"
-  "os"
-  "runtime"
-  "strings"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"runtime"
+	"strings"
 
-  _ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
 
 func OpenDatabase() error {
-  var err error
-  fileName := "db.sqlite3"
-  dbPath := "./storage/"
-  homeDirectory, err := os.UserHomeDir()
+	var err error
+	fileName := "db.sqlite3"
+	dbPath := "./storage/"
+	homeDirectory, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
 	}
-  osType := runtime.GOOS
-  switch osType {
-  case "windows":
-    dbPath = homeDirectory + "/.local/share/nviro/"
-  case "darwin":
-    dbPath = homeDirectory + "/.local/share/nviro/"
-  case "linux":
-    dbPath = homeDirectory + "/.local/share/nviro/"
-  default:
-    fmt.Printf("%s.\n", osType)
-  }
-  _ , error := os.Stat(dbPath)
+	osType := runtime.GOOS
+	switch osType {
+	case "windows":
+		dbPath = homeDirectory + "/.local/share/nviro/"
+	case "darwin":
+		dbPath = homeDirectory + "/.local/share/nviro/"
+	case "linux":
+		dbPath = homeDirectory + "/.local/share/nviro/"
+	default:
+		fmt.Printf("%s.\n", osType)
+	}
+	fmt.Printf("DB FILE LOCATION: %s\n", dbPath)
+	_, error := os.Stat(dbPath)
 
-  if os.IsNotExist(error) {
-    fmt.Printf("Creating dir: %s\n", dbPath)
-  }
-  {
-    err := os.MkdirAll(dbPath, 0750)
-    if err != nil && !os.IsExist(err) {
-      log.Fatal(err)
-    }
-  }
-  {
-    filePath := dbPath + fileName
-    db, err = sql.Open("sqlite3", filePath)
-    if err != nil {
-      return err
-    }
-  }
-  return db.Ping()
+	if os.IsNotExist(error) {
+		fmt.Printf("Creating dir: %s\n", dbPath)
+	}
+	{
+		err := os.MkdirAll(dbPath, 0750)
+		if err != nil && !os.IsExist(err) {
+			log.Fatal(err)
+		}
+	}
+	{
+		filePath := dbPath + fileName
+		db, err = sql.Open("sqlite3", filePath)
+		if err != nil {
+			return err
+		}
+	}
+	return db.Ping()
 }
 
 func SchemaCreate() error {
-  {
-    createProjectTableSQL := `
+	{
+		createProjectTableSQL := `
       CREATE TABLE IF NOT EXISTS "projects"
       (
         "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -70,16 +71,16 @@ func SchemaCreate() error {
         "updated_at" DATETIME
       );`
 
-    statement, err := db.Prepare(createProjectTableSQL)
-    if err != nil {
-      log.Fatal(err.Error())
-    }
-    statement.Exec()
-    log.Println("Created projects table")
-  }
+		statement, err := db.Prepare(createProjectTableSQL)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		statement.Exec()
+		log.Println("Created projects table")
+	}
 
-  {
-    createEnvironmentTableSQL := `
+	{
+		createEnvironmentTableSQL := `
       CREATE TABLE IF NOT EXISTS "environments"
       (
         "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -92,164 +93,164 @@ func SchemaCreate() error {
         foreign key("project_id") REFERENCES "projects"("id")
       );`
 
-    statement, err := db.Prepare(createEnvironmentTableSQL)
-    if err != nil {
-      log.Fatalln(err.Error())
-    }
-    statement.Exec()
-    log.Println("Created environments table")
-  }
-  return nil
+		statement, err := db.Prepare(createEnvironmentTableSQL)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+		statement.Exec()
+		log.Println("Created environments table")
+	}
+	return nil
 }
 
 type Project struct {
-	Id int `json:"id"`
-	Name string `json:"name"`
-  CreatedAt string `json:"created_at"`
-  UpdatedAt string `json:"updated_at"`
-  EnvironmentCount int `json:"environment_count"`
+	Id               int    `json:"id"`
+	Name             string `json:"name"`
+	CreatedAt        string `json:"created_at"`
+	UpdatedAt        string `json:"updated_at"`
+	EnvironmentCount int    `json:"environment_count"`
 }
 
 func ProjectInsert(name string) error {
-  statement, err := db.Prepare(`
+	statement, err := db.Prepare(`
     INSERT INTO projects
       (name, created_at, updated_at)
     VALUES
       (?, datetime('now'), datetime('now'))
   `)
-  if err != nil {
-    log.Fatal(err.Error())
-    return err
-  }
-  _, err = statement.Exec(name)
-  if err != nil {
-    log.Fatalln(err.Error())
-    return err
-  }
-  return nil
+	if err != nil {
+		log.Fatal(err.Error())
+		return err
+	}
+	_, err = statement.Exec(name)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	return nil
 }
 
 func ProjectUpdate(id int, name string) error {
-  statement, err := db.Prepare(`
+	statement, err := db.Prepare(`
     UPDATE projects
     SET
       name = ?,
       updated_at = datetime('now')
     WHERE id = ?
   `)
-  if err != nil {
-    log.Fatal(err.Error())
-    return err
-  }
-  _, err = statement.Exec(name, id)
-  if err != nil {
-    log.Fatalln(err.Error())
-    return err
-  }
-  return nil
+	if err != nil {
+		log.Fatal(err.Error())
+		return err
+	}
+	_, err = statement.Exec(name, id)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	return nil
 }
 
 func ProjectList() []Project {
-  rows, err := db.Query(`
+	rows, err := db.Query(`
     SELECT
       projects.*,
       (SELECT COUNT(*) FROM environments WHERE project_id = projects.id) AS environments_count
     FROM projects ORDER BY name ASC
   `)
-  if err != nil {
-    log.Fatal(err.Error())
-  }
-  defer rows.Close()
-  projects := []Project{}
-  for rows.Next() {
-    var id int
-    var name string
-    var created_at sql.NullString
-    var updated_at sql.NullString
-    var environment_count int
-    err = rows.Scan(&id, &name, &created_at, &updated_at, &environment_count)
-    if err != nil {
-      log.Fatal(err.Error())
-    }
-    projects = append(projects, Project{
-      id,
-      name,
-      created_at.String,
-      updated_at.String,
-      environment_count,
-    })
-  }
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer rows.Close()
+	projects := []Project{}
+	for rows.Next() {
+		var id int
+		var name string
+		var created_at sql.NullString
+		var updated_at sql.NullString
+		var environment_count int
+		err = rows.Scan(&id, &name, &created_at, &updated_at, &environment_count)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		projects = append(projects, Project{
+			id,
+			name,
+			created_at.String,
+			updated_at.String,
+			environment_count,
+		})
+	}
 
-  return projects
+	return projects
 }
 
 func ProjectDelete(id int) error {
-  statement, err := db.Prepare("DELETE FROM projects WHERE id = ?")
-  if err != nil {
-    log.Fatal(err.Error())
-  }
-  _, err = statement.Exec(id)
-  if err != nil {
-    log.Fatalln(err.Error())
-    return err
-  }
-  return nil
+	statement, err := db.Prepare("DELETE FROM projects WHERE id = ?")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	_, err = statement.Exec(id)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	return nil
 }
 
 func EnvironmentInsert(name string, content string, project_id int) error {
-  contentEncrypted := encrypt(getKey(), content)
-  statement, err := db.Prepare(`
+	contentEncrypted := encrypt(getKey(), content)
+	statement, err := db.Prepare(`
     INSERT INTO environments
       (name, content, project_id, created_at, updated_at, deleted_at)
     VALUES
       (?, ?, ?, datetime('now'), datetime('now'), NULL)`)
-  if err != nil {
-    log.Fatal(err.Error())
-    return err
-  }
-  _, err = statement.Exec(name, contentEncrypted, project_id)
-  if err != nil {
-    log.Fatalln(err.Error())
-    return err
-  }
-  return nil
+	if err != nil {
+		log.Fatal(err.Error())
+		return err
+	}
+	_, err = statement.Exec(name, contentEncrypted, project_id)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	return nil
 }
 
 type Environment struct {
-	Id int `json:"id"`
-	Name string `json:"name"`
-  Content string `json:"content"`
-  ProjectId int `json:"project_id"`
-  ProjectName string `json:"project_name"`
-  DeletedAt string `json:"deleted_at"`
-  CreatedAt string `json:"created_at"`
-  UpdatedAt string `json:"updated_at"`
-  HistoryCount int `json:"history_count"`
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	Content      string `json:"content"`
+	ProjectId    int    `json:"project_id"`
+	ProjectName  string `json:"project_name"`
+	DeletedAt    string `json:"deleted_at"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+	HistoryCount int    `json:"history_count"`
 }
 
 func EnvironmentList(withDeleted bool, name string, project_id int, id int) []Environment {
-  where := make([]string, 0)
-  var parameters []interface{}
-  whereSQL := ""
-  if !withDeleted {
-    where = append(where, "environments.deleted_at IS NULL")
-  }
-  if name != "" {
-    where = append(where, "environments.name = ?")
-    parameters = append(parameters, name)
-  }
-  if project_id > 0 {
-    where = append(where, "environments.project_id = ?")
-    parameters = append(parameters, project_id)
-  }
-  if id > 0 {
-    where = append(where, "environments.id != ?")
-    parameters = append(parameters, id)
-  }
-  if len(where) > 0 {
-    whereSQL = "WHERE " + strings.Join(where, " AND ")  
-  } 
-  query := fmt.Sprintf(`
+	where := make([]string, 0)
+	var parameters []interface{}
+	whereSQL := ""
+	if !withDeleted {
+		where = append(where, "environments.deleted_at IS NULL")
+	}
+	if name != "" {
+		where = append(where, "environments.name = ?")
+		parameters = append(parameters, name)
+	}
+	if project_id > 0 {
+		where = append(where, "environments.project_id = ?")
+		parameters = append(parameters, project_id)
+	}
+	if id > 0 {
+		where = append(where, "environments.id != ?")
+		parameters = append(parameters, id)
+	}
+	if len(where) > 0 {
+		whereSQL = "WHERE " + strings.Join(where, " AND ")
+	}
+	query := fmt.Sprintf(`
     SELECT
       environments.id,
       environments.name,
@@ -278,47 +279,47 @@ func EnvironmentList(withDeleted bool, name string, project_id int, id int) []En
       environments.project_id ASC,
       environments.created_at ASC
   `, whereSQL)
-  rows, err := db.Query(query, parameters...)
-  if err != nil {
-    log.Fatal(err.Error())
-  }
-  defer rows.Close()
-  environments := []Environment{}
-  key := getKey()
-  for rows.Next() {
-    var id int
-    var name string
-    var content string
-    var project_id int
-    var project_name string
-    var deleted_at sql.NullString
-    var created_at sql.NullString 
-    var updated_at sql.NullString
-    var history_count int
-    err = rows.Scan(&id, &name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at, &history_count)
-    if err != nil {
-      log.Fatal(err.Error())
-    }
-    contentDecrypted := decrypt(key, content)
-    environments = append(environments, Environment{
-      id,
-      name,
-      contentDecrypted,
-      project_id,
-      project_name,
-      deleted_at.String,
-      created_at.String,
-      updated_at.String,
-      history_count,
-    })
-  }
+	rows, err := db.Query(query, parameters...)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer rows.Close()
+	environments := []Environment{}
+	key := getKey()
+	for rows.Next() {
+		var id int
+		var name string
+		var content string
+		var project_id int
+		var project_name string
+		var deleted_at sql.NullString
+		var created_at sql.NullString
+		var updated_at sql.NullString
+		var history_count int
+		err = rows.Scan(&id, &name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at, &history_count)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		contentDecrypted := decrypt(key, content)
+		environments = append(environments, Environment{
+			id,
+			name,
+			contentDecrypted,
+			project_id,
+			project_name,
+			deleted_at.String,
+			created_at.String,
+			updated_at.String,
+			history_count,
+		})
+	}
 
-  return environments
+	return environments
 }
 
 func EnvironmentDelete(id int, force bool) error {
-  if !force {
-    statement, err := db.Prepare(`
+	if !force {
+		statement, err := db.Prepare(`
       SELECT
         environments.id,
         environments.deleted_at
@@ -327,45 +328,45 @@ func EnvironmentDelete(id int, force bool) error {
       WHERE
         environments.id = ?
     `)
-    if err != nil {
-      log.Fatal(err.Error())
-    }
-    defer statement.Close()
-    var environmentId int
-    var deleted_at sql.NullString
-    err = statement.QueryRow(id).Scan(&environmentId, &deleted_at)
-    if err != nil && err != sql.ErrNoRows {
-      log.Fatal(err.Error())
-    }
-    if environmentId > 0 && !deleted_at.Valid {
-      statement, err := db.Prepare("UPDATE environments SET deleted_at = datetime('now') WHERE id = ?")
-      if err != nil {
-        log.Fatal(err.Error())
-        return err
-      }
-      _, err = statement.Exec(id)
-      if err != nil {
-        log.Fatalln(err.Error())
-        return err
-      }
-    } 
-  } else {
-    statement, err := db.Prepare("DELETE FROM environments WHERE id = ?")
-    if err != nil {
-      log.Fatal(err.Error())
-      return err
-    }
-    _, err = statement.Exec(id)
-    if err != nil {
-      log.Fatalln(err.Error())
-      return err
-    }
-  }
-  return nil
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		defer statement.Close()
+		var environmentId int
+		var deleted_at sql.NullString
+		err = statement.QueryRow(id).Scan(&environmentId, &deleted_at)
+		if err != nil && err != sql.ErrNoRows {
+			log.Fatal(err.Error())
+		}
+		if environmentId > 0 && !deleted_at.Valid {
+			statement, err := db.Prepare("UPDATE environments SET deleted_at = datetime('now') WHERE id = ?")
+			if err != nil {
+				log.Fatal(err.Error())
+				return err
+			}
+			_, err = statement.Exec(id)
+			if err != nil {
+				log.Fatalln(err.Error())
+				return err
+			}
+		}
+	} else {
+		statement, err := db.Prepare("DELETE FROM environments WHERE id = ?")
+		if err != nil {
+			log.Fatal(err.Error())
+			return err
+		}
+		_, err = statement.Exec(id)
+		if err != nil {
+			log.Fatalln(err.Error())
+			return err
+		}
+	}
+	return nil
 }
 
 func EnvironmentShow(id int) Environment {
-  statement, err := db.Prepare(`
+	statement, err := db.Prepare(`
     SELECT
       environments.name,
       environments.content,
@@ -389,39 +390,39 @@ func EnvironmentShow(id int) Environment {
       INNER JOIN projects ON projects.id = environments.project_id
     WHERE environments.id = ?
   `)
-  if err != nil {
-    log.Fatal(err.Error())
-  }
-  defer statement.Close()
-  var name string
-  var content string
-  var project_id int
-  var project_name string
-  var deleted_at sql.NullString
-  var created_at sql.NullString 
-  var updated_at sql.NullString
-  var history_count int
-  err = statement.QueryRow(id).Scan(&name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at, &history_count)
-  if err != nil {
-    log.Fatal(err.Error())
-  }
-  key := getKey()
-  contentDecrypted := decrypt(key, content)
-  return Environment{
-    id,
-    name,
-    contentDecrypted,
-    project_id,
-    project_name,
-    deleted_at.String,
-    created_at.String,
-    updated_at.String,
-    history_count,
-  }
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer statement.Close()
+	var name string
+	var content string
+	var project_id int
+	var project_name string
+	var deleted_at sql.NullString
+	var created_at sql.NullString
+	var updated_at sql.NullString
+	var history_count int
+	err = statement.QueryRow(id).Scan(&name, &content, &project_id, &project_name, &deleted_at, &created_at, &updated_at, &history_count)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	key := getKey()
+	contentDecrypted := decrypt(key, content)
+	return Environment{
+		id,
+		name,
+		contentDecrypted,
+		project_id,
+		project_name,
+		deleted_at.String,
+		created_at.String,
+		updated_at.String,
+		history_count,
+	}
 }
 
 func EnvironmentUpdate(id int, name string, content string, project_id int) error {
-  statement, err := db.Prepare(`
+	statement, err := db.Prepare(`
     SELECT
       environments.id
     FROM
@@ -431,24 +432,24 @@ func EnvironmentUpdate(id int, name string, content string, project_id int) erro
       AND environments.project_id = ?
       AND environments.deleted_at IS NULL
   `)
-  if err != nil {
-    log.Fatal(err.Error())
-  }
-  defer statement.Close()
-  var environmentId int
-  err = statement.QueryRow(name, project_id).Scan(&environmentId)
-  if environmentId > 0 {
-    errDelete := EnvironmentDelete(id, false)
-    if errDelete != nil {
-      log.Fatal(errDelete)
-    }
-    err := EnvironmentInsert(name, content, project_id)
-    if err != nil {
-      log.Fatal(err.Error())
-      return err
-    }
-  } else {
-    statement, err := db.Prepare(`
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer statement.Close()
+	var environmentId int
+	err = statement.QueryRow(name, project_id).Scan(&environmentId)
+	if environmentId > 0 {
+		errDelete := EnvironmentDelete(id, false)
+		if errDelete != nil {
+			log.Fatal(errDelete)
+		}
+		err := EnvironmentInsert(name, content, project_id)
+		if err != nil {
+			log.Fatal(err.Error())
+			return err
+		}
+	} else {
+		statement, err := db.Prepare(`
       UPDATE environments
       SET
         name = ?,
@@ -457,26 +458,26 @@ func EnvironmentUpdate(id int, name string, content string, project_id int) erro
         updated_at = datetime('now')
       WHERE id = ?
     `)
-    if err != nil {
-      log.Fatal(err.Error())
-      return err
-    }
-    contentEncrypted := encrypt(getKey(), content)
-    _, err = statement.Exec(name, contentEncrypted, project_id, id)
-    if err != nil {
-      log.Fatalln(err.Error())
-      return err
-    }
-  }
-  return nil
+		if err != nil {
+			log.Fatal(err.Error())
+			return err
+		}
+		contentEncrypted := encrypt(getKey(), content)
+		_, err = statement.Exec(name, contentEncrypted, project_id, id)
+		if err != nil {
+			log.Fatalln(err.Error())
+			return err
+		}
+	}
+	return nil
 }
 
 func encrypt(keyString string, stringToEncrypt string) (encryptedString string) {
 	// convert key to bytes
-	key, _    := hex.DecodeString(keyString)
+	key, _ := hex.DecodeString(keyString)
 	plaintext := []byte(stringToEncrypt)
 
-	//Create a new Cipher Block from the key
+	// Create a new Cipher Block from the key
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err.Error())
@@ -525,6 +526,6 @@ func decrypt(keyString string, stringToDecrypt string) string {
 
 func getKey() string {
 	key := []byte("T4rukYC8g5b9DkcbLuxxByCRM9hsrgN7")
-	keyStr := hex.EncodeToString(key) //convert to string for saving
-  return keyStr
+	keyStr := hex.EncodeToString(key) // convert to string for saving
+	return keyStr
 }
