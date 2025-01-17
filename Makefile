@@ -11,6 +11,9 @@ build: dist
 serve: dist
 	go run main.go serve
 
+run:
+	go build -o bin/nviro main.go
+
 compile: dist
 	echo "Compiling for every OS and Platform"
 	GOOS=linux GOARCH=386 go build -o bin/nviro-linux-386 main.go
